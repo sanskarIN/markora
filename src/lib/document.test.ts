@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   findMatches,
   getBreadcrumb,
+  getFindQueryError,
   getHeadings,
   getWordStats,
   replaceAllMatches,
@@ -43,8 +44,46 @@ describe('document utilities', () => {
     expect(replaceMatch('Markora MARKORA', matches[0]!, 'Editor').content).toBe('Editor MARKORA');
   });
 
+  it('restricts literal matches to whole words when requested', () => {
+    const matches = findMatches('cat category cat_cat cat.', 'cat', {
+      matchCase: true,
+      wholeWord: true,
+    });
+
+    expect(matches).toEqual([
+      { start: 0, end: 3 },
+      { start: 21, end: 24 },
+    ]);
+  });
+
+  it('supports bounded regular-expression matching', () => {
+    const matches = findMatches('issue-12 issue-204 note', 'issue-\\d+', {
+      matchCase: true,
+      useRegex: true,
+    });
+
+    expect(matches).toEqual([
+      { start: 0, end: 8 },
+      { start: 9, end: 18 },
+    ]);
+  });
+
+  it('rejects unsafe or empty regular-expression patterns', () => {
+    expect(getFindQueryError('(a+)+', { matchCase: true, useRegex: true })).toContain('Nested');
+    expect(getFindQueryError('a*', { matchCase: true, useRegex: true })).toContain('empty');
+    expect(getFindQueryError('(', { matchCase: true, useRegex: true })).toBe('Invalid regular expression.');
+  });
+
   it('replaces all matches without interpreting replacement metacharacters', () => {
     const result = replaceAllMatches('a.a.a', '.', '$&', { matchCase: true });
     expect(result).toEqual({ content: 'a$&a$&a', count: 2 });
+  });
+
+  it('replaces regex matches using a literal replacement string', () => {
+    const result = replaceAllMatches('item-1 item-22', 'item-\\d+', '$1', {
+      matchCase: true,
+      useRegex: true,
+    });
+    expect(result).toEqual({ content: '$1 $1', count: 2 });
   });
 });
