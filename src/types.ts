@@ -1,6 +1,6 @@
 export type ThemeMode = 'system' | 'light' | 'dark';
 export type EditorTheme = 'graphite' | 'aurora' | 'paper';
-export type PanelMode = 'outline' | 'recent';
+export type PanelMode = 'outline' | 'recent' | 'statistics';
 
 export interface EditorSettings {
   themeMode: ThemeMode;
