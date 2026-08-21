@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 
 import { CommandPalette } from './components/CommandPalette';
+import { DropOverlay } from './components/DropOverlay';
 import { EditorPane } from './components/EditorPane';
 import { FindReplace } from './components/FindReplace';
 import { Onboarding } from './components/Onboarding';
@@ -10,6 +11,7 @@ import { Sidebar } from './components/Sidebar';
 import { StatusBar } from './components/StatusBar';
 import { TabBar } from './components/TabBar';
 import { Toolbar } from './components/Toolbar';
+import { useFileDrop } from './hooks/useFileDrop';
 import { useLayoutPreferences } from './hooks/useLayoutPreferences';
 import { useWorkspace } from './hooks/useWorkspace';
 import { getBreadcrumb, getCursorLine, getHeadings, isDirty } from './lib/document';
@@ -31,6 +33,8 @@ export default function App() {
     closeTab,
     openFile,
     openRecent,
+    openDroppedPaths,
+    openDroppedBrowserFiles,
     saveActive,
     reloadActiveFromDisk,
     exportHtml,
@@ -50,6 +54,16 @@ export default function App() {
   const [distractionFree, setDistractionFree] = useState(false);
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const recoveryNoticeShown = useRef(false);
+
+  const handleFileDropError = useCallback(
+    (message: string) => notify('warning', message),
+    [notify],
+  );
+  const dragActive = useFileDrop({
+    onDesktopPaths: openDroppedPaths,
+    onBrowserFiles: openDroppedBrowserFiles,
+    onError: handleFileDropError,
+  });
 
   const headings = useMemo(() => getHeadings(activeTab?.content ?? ''), [activeTab?.content]);
   const breadcrumbs = useMemo(
@@ -249,6 +263,8 @@ export default function App() {
 
   return (
     <div className={`app-shell ${distractionFree ? 'is-distraction-free' : ''}`}>
+      <DropOverlay active={dragActive} />
+
       {!distractionFree ? (
         <Toolbar
           distractionFree={distractionFree}
