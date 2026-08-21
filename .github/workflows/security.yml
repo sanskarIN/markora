@@ -36,6 +36,9 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Generate Rust lockfile
+        run: cargo generate-lockfile --manifest-path src-tauri/Cargo.toml
+
       - name: Install cargo-audit
         uses: taiki-e/install-action@cargo-audit
 
