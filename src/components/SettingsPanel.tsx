@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react';
 
-import type { EditorSettings } from '../types';
+import type { LayoutMode } from '../lib/layout';
 import { getAppVersion } from '../lib/platform';
+import type { EditorSettings } from '../types';
 
 interface SettingsPanelProps {
   open: boolean;
   settings: EditorSettings;
+  layoutMode: LayoutMode;
+  editorPanePercent: number;
   onUpdate: (patch: Partial<EditorSettings>) => void;
+  onLayoutModeChange: (mode: LayoutMode) => void;
+  onEditorPanePercentChange: (percent: number) => void;
+  onResetLayout: () => void;
   onExportBackup: () => void;
   onRestoreBackup: () => void;
   onOpenLink: (url: string) => void | Promise<void>;
@@ -16,7 +22,12 @@ interface SettingsPanelProps {
 export function SettingsPanel({
   open,
   settings,
+  layoutMode,
+  editorPanePercent,
   onUpdate,
+  onLayoutModeChange,
+  onEditorPanePercentChange,
+  onResetLayout,
   onExportBackup,
   onRestoreBackup,
   onOpenLink,
@@ -76,6 +87,28 @@ export function SettingsPanel({
                 <option value="paper">Paper</option>
               </select>
             </SettingRow>
+            <SettingRow label="Workspace layout">
+              <select
+                value={layoutMode}
+                onChange={(event) => onLayoutModeChange(event.target.value as LayoutMode)}
+              >
+                <option value="split">Split editor and preview</option>
+                <option value="editor">Editor only</option>
+                <option value="preview">Preview only</option>
+              </select>
+            </SettingRow>
+            <SettingRow label={`Editor share in split view — ${editorPanePercent}%`}>
+              <input
+                type="range"
+                min="30"
+                max="70"
+                step="5"
+                value={editorPanePercent}
+                disabled={layoutMode !== 'split'}
+                onChange={(event) => onEditorPanePercentChange(Number(event.target.value))}
+              />
+            </SettingRow>
+            <button type="button" onClick={onResetLayout}>Reset layout</button>
             <SettingRow label={`Font size — ${settings.fontSize}px`}>
               <input
                 type="range"
@@ -103,7 +136,7 @@ export function SettingsPanel({
               onChange={(showOutline) => onUpdate({ showOutline })}
             />
             <Toggle
-              label="Show preview"
+              label="Show preview in split layout"
               checked={settings.showPreview}
               onChange={(showPreview) => onUpdate({ showPreview })}
             />
