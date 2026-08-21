@@ -53,6 +53,7 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [distractionFree, setDistractionFree] = useState(false);
   const editorRef = useRef<HTMLTextAreaElement>(null);
+  const pendingEditorCommandRef = useRef<MarkdownCommand | null>(null);
   const recoveryNoticeShown = useRef(false);
 
   const handleFileDropError = useCallback(
@@ -76,8 +77,8 @@ export default function App() {
       const editor = editorRef.current;
       if (!activeTab) return;
       if (!editor) {
+        pendingEditorCommandRef.current = command;
         setMode('editor');
-        notify('info', 'Switched to Editor layout. Run the formatting command again.');
         return;
       }
 
@@ -94,8 +95,20 @@ export default function App() {
         updateCursorLine(getCursorLine(result.content, result.selectionStart));
       });
     },
-    [activeTab, notify, setMode, updateActiveContent, updateCursorLine],
+    [activeTab, setMode, updateActiveContent, updateCursorLine],
   );
+
+  useEffect(() => {
+    const pendingCommand = pendingEditorCommandRef.current;
+    if (!pendingCommand || layout.mode === 'preview') return;
+
+    const frame = window.requestAnimationFrame(() => {
+      if (!editorRef.current) return;
+      pendingEditorCommandRef.current = null;
+      applyEditorCommand(pendingCommand);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [applyEditorCommand, layout.mode]);
 
   useEffect(() => {
     if (!recoveredWorkspace || recoveryNoticeShown.current) return;
