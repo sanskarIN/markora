@@ -24,7 +24,7 @@ test('formats the active selection with structural editor commands', async ({ pa
   await editor.press(`${modifier}+b`);
 
   await expect(editor).toHaveValue('**important**');
-  await expect(page.getByRole('strong')).toHaveText('important');
+  await expect(page.locator('.markdown-preview strong')).toHaveText('important');
 
   await editor.fill('Alpha\nBeta');
   await editor.selectText();
@@ -58,6 +58,21 @@ test('find supports whole-word and bounded regex modes', async ({ page }) => {
   await page.getByLabel('Regex').check();
   await findInput.fill('issue-\\d+');
   await expect(page.getByRole('status').filter({ hasText: '1 / 2' })).toBeVisible();
+});
+
+test('opens a dropped Markdown file in the browser runtime', async ({ page }) => {
+  await page.evaluate(() => {
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(new File(['# Dropped Note\n\nOpened locally.'], 'dropped.md', { type: 'text/markdown' }));
+    window.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer }));
+    window.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer }));
+  });
+
+  await expect(page.getByRole('tab', { selected: true })).toContainText('dropped.md');
+  await expect(page.getByRole('textbox', { name: 'Markdown source' })).toHaveValue(
+    '# Dropped Note\n\nOpened locally.',
+  );
+  await expect(page.getByRole('heading', { name: 'Dropped Note' })).toBeVisible();
 });
 
 test('layout preference persists across reloads', async ({ page }) => {
