@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 
 import { CommandPalette } from './components/CommandPalette';
 import { EditorPane } from './components/EditorPane';
@@ -10,6 +10,7 @@ import { Sidebar } from './components/Sidebar';
 import { StatusBar } from './components/StatusBar';
 import { TabBar } from './components/TabBar';
 import { Toolbar } from './components/Toolbar';
+import { useLayoutPreferences } from './hooks/useLayoutPreferences';
 import { useWorkspace } from './hooks/useWorkspace';
 import { getBreadcrumb, getCursorLine, getHeadings, isDirty } from './lib/document';
 import { applyMarkdownCommand, type MarkdownCommand } from './lib/editorCommands';
@@ -38,6 +39,7 @@ export default function App() {
     completeOnboarding,
     notify,
   } = workspace;
+  const { layout, setMode, setEditorPanePercent, resetLayout } = useLayoutPreferences();
 
   const [panel, setPanel] = useState<PanelMode>('outline');
   const [findOpen, setFindOpen] = useState(false);
@@ -56,7 +58,12 @@ export default function App() {
   const applyEditorCommand = useCallback(
     (command: MarkdownCommand) => {
       const editor = editorRef.current;
-      if (!activeTab || !editor) return;
+      if (!activeTab) return;
+      if (!editor) {
+        setMode('editor');
+        notify('info', 'Switched to Editor layout. Run the formatting command again.');
+        return;
+      }
 
       const result = applyMarkdownCommand(
         activeTab.content,
@@ -71,7 +78,7 @@ export default function App() {
         updateCursorLine(getCursorLine(result.content, result.selectionStart));
       });
     },
-    [activeTab, updateActiveContent, updateCursorLine],
+    [activeTab, notify, setMode, updateActiveContent, updateCursorLine],
   );
 
   useEffect(() => {
@@ -199,27 +206,41 @@ export default function App() {
       { id: 'format-task', label: 'Toggle task list', shortcut: null, keywords: ['format', 'todo', 'checkbox'], run: () => applyEditorCommand('task-list') },
       { id: 'format-code-block', label: 'Toggle fenced code block', shortcut: null, keywords: ['format', 'code', 'fence'], run: () => applyEditorCommand('code-block') },
       { id: 'format-link', label: 'Insert Markdown link', shortcut: null, keywords: ['format', 'link', 'url'], run: () => applyEditorCommand('link') },
+      { id: 'layout-split', label: 'Use split editor and preview layout', shortcut: null, keywords: ['layout', 'preview'], run: () => setMode('split') },
+      { id: 'layout-editor', label: 'Use editor-only layout', shortcut: null, keywords: ['layout', 'focus'], run: () => setMode('editor') },
+      { id: 'layout-preview', label: 'Use preview-only layout', shortcut: null, keywords: ['layout', 'reader'], run: () => setMode('preview') },
       { id: 'html', label: 'Export HTML', shortcut: null, keywords: ['export', 'web'], run: () => void exportHtml() },
       { id: 'pdf', label: 'Print / export PDF', shortcut: null, keywords: ['export', 'print'], run: exportPdf },
       { id: 'settings', label: 'Open settings', shortcut: 'Ctrl/⌘ ,', keywords: ['preferences', 'theme'], run: () => setSettingsOpen(true) },
       { id: 'focus', label: distractionFree ? 'Exit distraction-free mode' : 'Enter distraction-free mode', shortcut: null, keywords: ['focus', 'writing'], run: () => setDistractionFree((value) => !value) },
     ],
-    [applyEditorCommand, distractionFree, exportHtml, newTab, openFile, saveActive],
+    [applyEditorCommand, distractionFree, exportHtml, newTab, openFile, saveActive, setMode],
   );
 
   if (!activeTab) return null;
 
+  const showSidebar = state.settings.showOutline && !distractionFree;
+  const showEditor = distractionFree || layout.mode !== 'preview';
+  const showPreview =
+    !distractionFree &&
+    (layout.mode === 'preview' || (layout.mode === 'split' && state.settings.showPreview));
   const layoutClass = [
     'workspace-grid',
-    state.settings.showOutline && !distractionFree ? 'has-sidebar' : 'no-sidebar',
-    state.settings.showPreview && !distractionFree ? 'has-preview' : 'no-preview',
+    showSidebar ? 'has-sidebar' : 'no-sidebar',
+    showPreview ? 'has-preview' : 'no-preview',
+    `layout-${distractionFree ? 'editor' : layout.mode}`,
   ].join(' ');
+  const layoutStyle = {
+    '--editor-ratio': `${layout.editorPanePercent}fr`,
+    '--preview-ratio': `${100 - layout.editorPanePercent}fr`,
+  } as CSSProperties;
 
   return (
     <div className={`app-shell ${distractionFree ? 'is-distraction-free' : ''}`}>
       {!distractionFree ? (
         <Toolbar
           distractionFree={distractionFree}
+          layoutMode={layout.mode}
           onNew={newTab}
           onOpen={() => void openFile()}
           onSave={() => void saveActive(false)}
@@ -230,6 +251,7 @@ export default function App() {
           onCommandPalette={() => setCommandOpen(true)}
           onSettings={() => setSettingsOpen(true)}
           onFormat={applyEditorCommand}
+          onLayoutModeChange={setMode}
           onToggleDistraction={() => setDistractionFree((value) => !value)}
         />
       ) : (
@@ -261,8 +283,8 @@ export default function App() {
         onSelectRange={selectEditorRange}
       />
 
-      <main className={layoutClass}>
-        {state.settings.showOutline && !distractionFree ? (
+      <main className={layoutClass} style={layoutStyle}>
+        {showSidebar ? (
           <Sidebar
             panel={panel}
             headings={headings}
@@ -274,21 +296,21 @@ export default function App() {
           />
         ) : null}
 
-        <EditorPane
-          ref={editorRef}
-          title={activeTab.title}
-          content={activeTab.content}
-          breadcrumbs={breadcrumbs}
-          fontSize={state.settings.fontSize}
-          lineHeight={state.settings.lineHeight}
-          wordWrap={state.settings.wordWrap}
-          onChange={updateActiveContent}
-          onCursorLineChange={updateCursorLine}
-        />
-
-        {state.settings.showPreview && !distractionFree ? (
-          <PreviewPane markdown={activeTab.content} onOpenLink={handleOpenLink} />
+        {showEditor ? (
+          <EditorPane
+            ref={editorRef}
+            title={activeTab.title}
+            content={activeTab.content}
+            breadcrumbs={breadcrumbs}
+            fontSize={state.settings.fontSize}
+            lineHeight={state.settings.lineHeight}
+            wordWrap={state.settings.wordWrap}
+            onChange={updateActiveContent}
+            onCursorLineChange={updateCursorLine}
+          />
         ) : null}
+
+        {showPreview ? <PreviewPane markdown={activeTab.content} onOpenLink={handleOpenLink} /> : null}
       </main>
 
       <StatusBar tab={activeTab} autosave={state.settings.autosave} toasts={toasts} />
@@ -297,7 +319,12 @@ export default function App() {
       <SettingsPanel
         open={settingsOpen}
         settings={state.settings}
+        layoutMode={layout.mode}
+        editorPanePercent={layout.editorPanePercent}
         onUpdate={updateSettings}
+        onLayoutModeChange={setMode}
+        onEditorPanePercentChange={setEditorPanePercent}
+        onResetLayout={resetLayout}
         onExportBackup={() => void exportBackup()}
         onRestoreBackup={() => void restoreBackup()}
         onOpenLink={handleOpenLink}
