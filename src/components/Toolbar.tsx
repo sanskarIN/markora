@@ -1,7 +1,9 @@
 import type { MarkdownCommand } from '../lib/editorCommands';
+import type { LayoutMode } from '../lib/layout';
 
 interface ToolbarProps {
   distractionFree: boolean;
+  layoutMode: LayoutMode;
   onNew: () => void;
   onOpen: () => void;
   onSave: () => void;
@@ -12,11 +14,13 @@ interface ToolbarProps {
   onCommandPalette: () => void;
   onSettings: () => void;
   onFormat: (command: MarkdownCommand) => void;
+  onLayoutModeChange: (mode: LayoutMode) => void;
   onToggleDistraction: () => void;
 }
 
 export function Toolbar({
   distractionFree,
+  layoutMode,
   onNew,
   onOpen,
   onSave,
@@ -27,6 +31,7 @@ export function Toolbar({
   onCommandPalette,
   onSettings,
   onFormat,
+  onLayoutModeChange,
   onToggleDistraction,
 }: ToolbarProps) {
   return (
@@ -58,6 +63,12 @@ export function Toolbar({
         <ToolbarButton label="List" shortcut="Bullet list" onClick={() => onFormat('bullet-list')} />
       </nav>
 
+      <nav className="toolbar-actions layout-actions" aria-label="Editor layout">
+        <LayoutButton label="Split" mode="split" active={layoutMode === 'split'} onChange={onLayoutModeChange} />
+        <LayoutButton label="Editor" mode="editor" active={layoutMode === 'editor'} onChange={onLayoutModeChange} />
+        <LayoutButton label="Preview" mode="preview" active={layoutMode === 'preview'} onChange={onLayoutModeChange} />
+      </nav>
+
       <nav className="toolbar-actions toolbar-actions-end" aria-label="Workspace actions">
         <ToolbarButton label="Find" shortcut="Ctrl/⌘ F" onClick={onFind} />
         <ToolbarButton label="Commands" shortcut="Ctrl/⌘ K" onClick={onCommandPalette} />
@@ -85,6 +96,30 @@ interface ToolbarButtonProps {
 function ToolbarButton({ label, shortcut, onClick }: ToolbarButtonProps) {
   return (
     <button className="toolbar-button" type="button" onClick={onClick} title={`${label} — ${shortcut}`}>
+      {label}
+    </button>
+  );
+}
+
+function LayoutButton({
+  label,
+  mode,
+  active,
+  onChange,
+}: {
+  label: string;
+  mode: LayoutMode;
+  active: boolean;
+  onChange: (mode: LayoutMode) => void;
+}) {
+  return (
+    <button
+      className="toolbar-button"
+      type="button"
+      aria-pressed={active}
+      onClick={() => onChange(mode)}
+      title={`${label} layout`}
+    >
       {label}
     </button>
   );
