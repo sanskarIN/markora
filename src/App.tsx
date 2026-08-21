@@ -267,6 +267,7 @@ export default function App() {
             panel={panel}
             headings={headings}
             recentFiles={state.recentFiles}
+            content={activeTab.content}
             onPanelChange={setPanel}
             onHeadingSelect={handleHeadingSelect}
             onRecentOpen={(path) => void openRecent(path)}
