@@ -32,9 +32,11 @@ export default function App() {
     openFile,
     openRecent,
     saveActive,
+    reloadActiveFromDisk,
     exportHtml,
     exportBackup,
     restoreBackup,
+    resetWorkspace,
     updateSettings,
     completeOnboarding,
     notify,
@@ -195,6 +197,7 @@ export default function App() {
       { id: 'open', label: 'Open Markdown file', shortcut: 'Ctrl/⌘ O', keywords: ['file', 'disk'], run: () => void openFile() },
       { id: 'save', label: 'Save document', shortcut: 'Ctrl/⌘ S', keywords: ['file', 'disk'], run: () => void saveActive(false) },
       { id: 'save-as', label: 'Save document as…', shortcut: 'Ctrl/⌘ Shift S', keywords: ['file', 'copy'], run: () => void saveActive(true) },
+      { id: 'reload-disk', label: 'Reload active file from disk', shortcut: null, keywords: ['file', 'reload', 'conflict'], run: () => void reloadActiveFromDisk() },
       { id: 'find', label: 'Find and replace', shortcut: 'Ctrl/⌘ F', keywords: ['search', 'replace'], run: () => setFindOpen(true) },
       { id: 'format-bold', label: 'Format selection as bold', shortcut: 'Ctrl/⌘ B', keywords: ['format', 'strong'], run: () => applyEditorCommand('bold') },
       { id: 'format-italic', label: 'Format selection as italic', shortcut: 'Ctrl/⌘ I', keywords: ['format', 'emphasis'], run: () => applyEditorCommand('italic') },
@@ -214,7 +217,16 @@ export default function App() {
       { id: 'settings', label: 'Open settings', shortcut: 'Ctrl/⌘ ,', keywords: ['preferences', 'theme'], run: () => setSettingsOpen(true) },
       { id: 'focus', label: distractionFree ? 'Exit distraction-free mode' : 'Enter distraction-free mode', shortcut: null, keywords: ['focus', 'writing'], run: () => setDistractionFree((value) => !value) },
     ],
-    [applyEditorCommand, distractionFree, exportHtml, newTab, openFile, saveActive, setMode],
+    [
+      applyEditorCommand,
+      distractionFree,
+      exportHtml,
+      newTab,
+      openFile,
+      reloadActiveFromDisk,
+      saveActive,
+      setMode,
+    ],
   );
 
   if (!activeTab) return null;
@@ -319,14 +331,20 @@ export default function App() {
       <SettingsPanel
         open={settingsOpen}
         settings={state.settings}
+        tabs={state.tabs}
+        activeId={state.activeId}
         layoutMode={layout.mode}
         editorPanePercent={layout.editorPanePercent}
         onUpdate={updateSettings}
+        onActivateTab={setActiveId}
+        onCloseTab={closeTab}
         onLayoutModeChange={setMode}
         onEditorPanePercentChange={setEditorPanePercent}
         onResetLayout={resetLayout}
+        onReloadActiveFromDisk={() => void reloadActiveFromDisk()}
         onExportBackup={() => void exportBackup()}
         onRestoreBackup={() => void restoreBackup()}
+        onResetWorkspace={resetWorkspace}
         onOpenLink={handleOpenLink}
         onClose={() => setSettingsOpen(false)}
       />
