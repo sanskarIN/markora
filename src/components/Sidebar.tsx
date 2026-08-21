@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 
-import type { HeadingItem, PanelMode, RecentFile } from '../types';
 import { getDocumentStatistics } from '../lib/statistics';
+import type { HeadingItem, PanelMode, RecentFile } from '../types';
+import { OutlineNavigator } from './OutlineNavigator';
 
 interface SidebarProps {
   panel: PanelMode;
@@ -56,27 +57,9 @@ export function Sidebar({
         </button>
       </div>
 
-      <div className="sidebar-content">
+      <div className={`sidebar-content sidebar-content-${panel}`}>
         {panel === 'outline' ? (
-          headings.length ? (
-            <nav aria-label="Document outline">
-              {headings.map((heading) => (
-                <button
-                  key={`${heading.line}-${heading.id}`}
-                  className="outline-item"
-                  type="button"
-                  style={{ paddingInlineStart: `${12 + (heading.level - 1) * 12}px` }}
-                  title={`Line ${heading.line}`}
-                  onClick={() => onHeadingSelect(heading)}
-                >
-                  <span className="outline-level" aria-hidden="true">H{heading.level}</span>
-                  <span>{heading.text}</span>
-                </button>
-              ))}
-            </nav>
-          ) : (
-            <EmptySidebarState title="No headings yet" body="Add Markdown headings to build an outline." />
-          )
+          <OutlineNavigator headings={headings} onHeadingSelect={onHeadingSelect} />
         ) : panel === 'recent' ? (
           recentFiles.length ? (
             <div className="recent-list">
