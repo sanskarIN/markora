@@ -1,4 +1,5 @@
 mod commands;
+mod file_watch;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -12,6 +13,7 @@ pub fn run() {
             commands::open_backup_file,
             commands::open_external_url,
             commands::app_version,
+            file_watch::file_fingerprint,
         ])
         .run(tauri::generate_context!())
         .expect("failed to run Markora");
