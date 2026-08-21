@@ -123,6 +123,8 @@ export function getWordStats(content: string): { words: number; characters: numb
 
 export interface FindOptions {
   matchCase: boolean;
+  wholeWord?: boolean;
+  useRegex?: boolean;
 }
 
 export interface TextMatch {
@@ -130,9 +132,59 @@ export interface TextMatch {
   end: number;
 }
 
-export function findMatches(content: string, query: string, options: FindOptions): TextMatch[] {
-  if (!query) return [];
+const MAX_REGEX_QUERY_LENGTH = 160;
+const MAX_REGEX_DOCUMENT_LENGTH = 2_000_000;
+const WORD_CHARACTER = /[\p{L}\p{N}_]/u;
 
+export function getFindQueryError(
+  query: string,
+  options: FindOptions,
+  contentLength = 0,
+): string | null {
+  if (!options.useRegex || !query) return null;
+  if (query.length > MAX_REGEX_QUERY_LENGTH) {
+    return `Regex searches are limited to ${MAX_REGEX_QUERY_LENGTH} characters.`;
+  }
+  if (contentLength > MAX_REGEX_DOCUMENT_LENGTH) {
+    return 'Regex mode is disabled for documents larger than 2 MB.';
+  }
+  if (/\\[1-9]/.test(query)) return 'Regex backreferences are disabled for predictable search performance.';
+  if (/\(\?[=!<]/.test(query)) return 'Regex lookaround is disabled for predictable search performance.';
+  if (/\((?:[^()\\]|\\.)*[+*{][^()]*\)\s*[+*{]/.test(query)) {
+    return 'Nested quantified groups are disabled for predictable search performance.';
+  }
+
+  try {
+    const regex = new RegExp(query, options.matchCase ? 'gu' : 'giu');
+    if (regex.test('')) return 'Regex patterns that can match empty text are not supported.';
+  } catch {
+    return 'Invalid regular expression.';
+  }
+  return null;
+}
+
+export function findMatches(content: string, query: string, options: FindOptions): TextMatch[] {
+  if (!query || getFindQueryError(query, options, content.length)) return [];
+
+  if (!options.useRegex) {
+    return findLiteralMatches(content, query, options);
+  }
+
+  const regex = new RegExp(query, options.matchCase ? 'gu' : 'giu');
+  const matches: TextMatch[] = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(content)) !== null) {
+    const text = match[0];
+    const candidate = { start: match.index, end: match.index + text.length };
+    if (!options.wholeWord || isWholeWord(content, candidate)) matches.push(candidate);
+    if (matches.length >= 10_000) break;
+  }
+
+  return matches;
+}
+
+function findLiteralMatches(content: string, query: string, options: FindOptions): TextMatch[] {
   const haystack = options.matchCase ? content : content.toLocaleLowerCase();
   const needle = options.matchCase ? query : query.toLocaleLowerCase();
   const matches: TextMatch[] = [];
@@ -141,11 +193,19 @@ export function findMatches(content: string, query: string, options: FindOptions
   while (cursor <= haystack.length - needle.length) {
     const index = haystack.indexOf(needle, cursor);
     if (index === -1) break;
-    matches.push({ start: index, end: index + query.length });
+    const candidate = { start: index, end: index + query.length };
+    if (!options.wholeWord || isWholeWord(content, candidate)) matches.push(candidate);
+    if (matches.length >= 10_000) break;
     cursor = index + Math.max(1, needle.length);
   }
 
   return matches;
+}
+
+function isWholeWord(content: string, match: TextMatch): boolean {
+  const before = match.start > 0 ? content.slice(match.start - 1, match.start) : '';
+  const after = match.end < content.length ? content.slice(match.end, match.end + 1) : '';
+  return (!before || !WORD_CHARACTER.test(before)) && (!after || !WORD_CHARACTER.test(after));
 }
 
 export function replaceMatch(
