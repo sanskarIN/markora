@@ -9,6 +9,7 @@ import {
   type WorkspaceSnapshot,
 } from '../types';
 import { createDocument, createId, deriveFileName, isDirty, WELCOME_MARKDOWN } from '../lib/document';
+import { limitDroppedItems, readDroppedBrowserFile } from '../lib/fileDrop';
 import { logger } from '../lib/logging';
 import { renderMarkdownDocument } from '../lib/markdown';
 import {
@@ -111,7 +112,7 @@ export function useWorkspace() {
       conflictWarningsRef.current.delete(path);
       unverifiedRecoveredPathsRef.current.delete(path);
     } catch (error: unknown) {
-      logger.warn('file_fingerprint_failed', { message: errorMessage(error), path });
+      logger.warn('file_fingerprint_failed', { message: errorMessage(error) });
     }
   }, []);
 
@@ -183,7 +184,7 @@ export function useWorkspace() {
               ),
             }));
           } catch (error: unknown) {
-            logger.error('autosave_failed', { message: errorMessage(error), path });
+            logger.error('autosave_failed', { message: errorMessage(error) });
             notify('warning', `Autosave failed for ${tab.title}. Your recovery copy is still local.`);
           }
         })();
@@ -277,7 +278,7 @@ export function useWorkspace() {
         await rememberFingerprint(opened.path);
         notify('success', 'File opened.');
       } catch (error: unknown) {
-        logger.warn('open_recent_failed', { message: errorMessage(error), path });
+        logger.warn('open_recent_failed', { message: errorMessage(error) });
         setState((current) => ({
           ...current,
           recentFiles: current.recentFiles.filter((file) => file.path !== path),
@@ -286,6 +287,56 @@ export function useWorkspace() {
       }
     },
     [notify, rememberFingerprint],
+  );
+
+  const openDroppedPaths = useCallback(
+    async (paths: string[]) => {
+      const uniquePaths = Array.from(new Set(paths));
+      const limited = limitDroppedItems(uniquePaths);
+      let openedCount = 0;
+      let failedCount = 0;
+      let lastError = '';
+
+      for (const path of limited) {
+        try {
+          const opened = await readMarkdownFile(path);
+          setState((current) => insertOpenedFile(current, opened.path, opened.name, opened.content));
+          await rememberFingerprint(opened.path);
+          openedCount += 1;
+        } catch (error: unknown) {
+          failedCount += 1;
+          lastError = errorMessage(error);
+          logger.warn('drop_open_failed', { message: lastError });
+        }
+      }
+
+      notifyDroppedFileResult(notify, openedCount, failedCount, uniquePaths.length - limited.length, lastError);
+    },
+    [notify, rememberFingerprint],
+  );
+
+  const openDroppedBrowserFiles = useCallback(
+    async (files: File[]) => {
+      const limited = limitDroppedItems(files);
+      let openedCount = 0;
+      let failedCount = 0;
+      let lastError = '';
+
+      for (const file of limited) {
+        try {
+          const opened = await readDroppedBrowserFile(file);
+          setState((current) => insertOpenedFile(current, null, opened.name, opened.content));
+          openedCount += 1;
+        } catch (error: unknown) {
+          failedCount += 1;
+          lastError = errorMessage(error);
+          logger.warn('browser_drop_open_failed', { message: lastError });
+        }
+      }
+
+      notifyDroppedFileResult(notify, openedCount, failedCount, files.length - limited.length, lastError);
+    },
+    [notify],
   );
 
   const saveActive = useCallback(
@@ -327,7 +378,7 @@ export function useWorkspace() {
         }));
         notify('success', 'File saved.');
       } catch (error: unknown) {
-        logger.error('save_file_failed', { message: errorMessage(error), path: tab.path });
+        logger.error('save_file_failed', { message: errorMessage(error) });
         notify('error', errorMessage(error));
       }
     },
@@ -369,7 +420,7 @@ export function useWorkspace() {
       await rememberFingerprint(opened.path);
       notify('success', 'Reloaded the latest disk version.');
     } catch (error: unknown) {
-      logger.warn('reload_file_failed', { message: errorMessage(error), path: tab.path });
+      logger.warn('reload_file_failed', { message: errorMessage(error) });
       notify('error', errorMessage(error));
     }
   }, [notify, rememberFingerprint, state.activeId, state.tabs]);
@@ -465,6 +516,8 @@ export function useWorkspace() {
     closeTab,
     openFile,
     openRecent,
+    openDroppedPaths,
+    openDroppedBrowserFiles,
     saveActive,
     reloadActiveFromDisk,
     exportHtml,
@@ -508,6 +561,27 @@ function addRecent(files: RecentFile[], path: string, name: string): RecentFile[
     { path, name: name || deriveFileName(path), openedAt: Date.now() },
     ...files.filter((file) => file.path !== path),
   ].slice(0, 12);
+}
+
+function notifyDroppedFileResult(
+  notify: (tone: ToastMessage['tone'], message: string) => void,
+  openedCount: number,
+  failedCount: number,
+  ignoredCount: number,
+  lastError: string,
+): void {
+  if (openedCount > 0) {
+    notify('success', `Opened ${openedCount} dropped ${openedCount === 1 ? 'file' : 'files'}.`);
+  }
+  if (failedCount > 0) {
+    notify(
+      'warning',
+      `${failedCount} dropped ${failedCount === 1 ? 'file was' : 'files were'} skipped.${lastError ? ` ${lastError}` : ''}`,
+    );
+  }
+  if (ignoredCount > 0) {
+    notify('warning', `${ignoredCount} additional dropped ${ignoredCount === 1 ? 'file was' : 'files were'} ignored.`);
+  }
 }
 
 function errorMessage(error: unknown): string {
