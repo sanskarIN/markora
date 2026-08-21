@@ -83,7 +83,7 @@ export function getHeadings(markdown: string): HeadingItem[] {
 
     const text = match[2].trim();
     headings.push({
-      id: slugger.slug(text),
+      id: `markora-${slugger.slug(text)}`,
       level: match[1].length,
       text,
       line: index + 1,
