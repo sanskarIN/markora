@@ -18,9 +18,10 @@ describe('PreviewPane', () => {
     const onOpenLink = vi.fn();
     render(<PreviewPane markdown={'[unsafe](javascript:alert(1))'} onOpenLink={onOpenLink} />);
 
-    const link = screen.getByRole('link', { name: 'unsafe' });
+    const link = screen.getByText('unsafe').closest('a');
+    expect(link).not.toBeNull();
     expect(link).not.toHaveAttribute('href', expect.stringContaining('javascript:'));
-    fireEvent.click(link);
+    if (link) fireEvent.click(link);
     expect(onOpenLink).not.toHaveBeenCalled();
   });
 
