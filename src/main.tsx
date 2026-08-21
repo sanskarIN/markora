@@ -5,6 +5,7 @@ import App from './App';
 import './styles.css';
 import './advanced.css';
 import './outline.css';
+import './drop.css';
 import './recovery.css';
 
 const root = document.getElementById('root');
