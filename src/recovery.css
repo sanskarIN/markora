@@ -1,0 +1,119 @@
+.recovery-inspector {
+  display: grid;
+  gap: 10px;
+}
+
+.recovery-summary {
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.recovery-summary strong {
+  font-size: 12px;
+}
+
+.recovery-summary span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.recovery-list {
+  display: grid;
+  gap: 7px;
+  max-height: 260px;
+  overflow: auto;
+}
+
+.recovery-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.recovery-item.is-active {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.recovery-item-main {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.recovery-item-main strong,
+.recovery-item-main span,
+.recovery-item-main small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recovery-item-main strong {
+  font-size: 12px;
+}
+
+.recovery-item-main span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.recovery-item-main small {
+  color: var(--subtle);
+  font-size: 10px;
+}
+
+.recovery-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.recovery-actions button,
+.danger-button {
+  min-height: 30px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.recovery-actions button:hover,
+.danger-button:hover {
+  background: var(--surface-3);
+}
+
+.active-recovery-label {
+  color: var(--accent-strong);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.danger-button {
+  justify-self: start;
+  border-color: color-mix(in srgb, var(--danger) 40%, var(--border));
+  color: var(--danger);
+}
+
+@media (max-width: 620px) {
+  .recovery-item {
+    grid-template-columns: 1fr;
+  }
+
+  .recovery-actions {
+    justify-content: flex-start;
+  }
+}
