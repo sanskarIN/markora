@@ -1,0 +1,30 @@
+[package]
+name = "markora"
+version = "0.1.0"
+description = "Markora local-first Markdown editor"
+authors = ["Sanskar <sanskarin@outlook.in>"]
+edition = "2024"
+license = "MIT"
+rust-version = "1.85"
+
+[lib]
+name = "markora_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = "2.6.3"
+
+[dependencies]
+open = "5"
+rfd = "0.15"
+serde = { version = "1", features = ["derive"] }
+tauri = { version = "2.11.5" }
+tempfile = "3.27"
+url = "2"
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true
