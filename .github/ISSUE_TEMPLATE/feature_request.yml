@@ -1,0 +1,54 @@
+name: Feature request
+description: Propose a coherent improvement to Markora.
+title: "[Feature]: "
+labels: [enhancement, needs-triage]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      description: What writing or Markdown workflow would improve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the user-facing behavior rather than only implementation details.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What workarounds or different designs did you consider?
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: Primary platform impact
+      options:
+        - All desktop platforms
+        - Windows
+        - macOS
+        - Linux
+        - Development web preview
+        - Platform-independent
+    validations:
+      required: true
+  - type: checkboxes
+    id: qualities
+    attributes:
+      label: Product-quality considerations
+      options:
+        - label: This can preserve local-first/privacy behavior.
+        - label: This can remain keyboard accessible.
+        - label: This does not require intrusive sign-in or donation prompts.
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and the roadmap.
+          required: true
+        - label: This request is focused on a real Markora use case.
+          required: true
