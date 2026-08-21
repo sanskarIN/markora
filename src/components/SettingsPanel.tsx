@@ -2,19 +2,26 @@ import { useEffect, useState } from 'react';
 
 import type { LayoutMode } from '../lib/layout';
 import { getAppVersion } from '../lib/platform';
-import type { EditorSettings } from '../types';
+import type { DocumentTab, EditorSettings } from '../types';
+import { RecoveryInspector } from './RecoveryInspector';
 
 interface SettingsPanelProps {
   open: boolean;
   settings: EditorSettings;
+  tabs: DocumentTab[];
+  activeId: string;
   layoutMode: LayoutMode;
   editorPanePercent: number;
   onUpdate: (patch: Partial<EditorSettings>) => void;
+  onActivateTab: (id: string) => void;
+  onCloseTab: (id: string) => void;
   onLayoutModeChange: (mode: LayoutMode) => void;
   onEditorPanePercentChange: (percent: number) => void;
   onResetLayout: () => void;
+  onReloadActiveFromDisk: () => void;
   onExportBackup: () => void;
   onRestoreBackup: () => void;
+  onResetWorkspace: () => void;
   onOpenLink: (url: string) => void | Promise<void>;
   onClose: () => void;
 }
@@ -22,14 +29,20 @@ interface SettingsPanelProps {
 export function SettingsPanel({
   open,
   settings,
+  tabs,
+  activeId,
   layoutMode,
   editorPanePercent,
   onUpdate,
+  onActivateTab,
+  onCloseTab,
   onLayoutModeChange,
   onEditorPanePercentChange,
   onResetLayout,
+  onReloadActiveFromDisk,
   onExportBackup,
   onRestoreBackup,
+  onResetWorkspace,
   onOpenLink,
   onClose,
 }: SettingsPanelProps) {
@@ -159,12 +172,26 @@ export function SettingsPanel({
               />
             </SettingRow>
             <div className="button-row">
+              <button type="button" onClick={onReloadActiveFromDisk}>Reload active file from disk</button>
               <button type="button" onClick={onExportBackup}>Export workspace backup</button>
               <button type="button" onClick={onRestoreBackup}>Restore backup</button>
             </div>
             <p className="settings-note">
-              Recovery snapshots are kept in the app's local webview storage. Document content is never intentionally logged.
+              Autosave pauses when Markora detects that a file changed outside the app. Recovered dirty disk files require one explicit save before autosave resumes.
             </p>
+          </SettingsSection>
+
+          <SettingsSection
+            title="Recovery"
+            description="Inspect the local workspace snapshot before removing recovered documents or resetting the session."
+          >
+            <RecoveryInspector
+              tabs={tabs}
+              activeId={activeId}
+              onActivate={onActivateTab}
+              onCloseTab={onCloseTab}
+              onResetWorkspace={onResetWorkspace}
+            />
           </SettingsSection>
 
           <SettingsSection title="Accessibility" description="Keyboard-first controls and readable motion defaults.">
