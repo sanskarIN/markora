@@ -23,6 +23,11 @@ export async function readMarkdownFile(path: string): Promise<OpenedFile> {
   return invoke<OpenedFile>('read_markdown_file', { path });
 }
 
+export async function getFileFingerprint(path: string): Promise<string | null> {
+  if (!isDesktopRuntime()) return null;
+  return invoke<string>('file_fingerprint', { path });
+}
+
 export async function saveMarkdownFile(
   path: string | null,
   content: string,
