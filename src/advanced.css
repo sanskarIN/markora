@@ -92,6 +92,20 @@
   }
 }
 
+@media (max-width: 820px) {
+  .workspace-grid.layout-preview.has-sidebar.has-preview {
+    grid-template-columns: 190px minmax(0, 1fr);
+  }
+
+  .workspace-grid.layout-preview.no-sidebar.has-preview {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workspace-grid.layout-preview.has-preview .preview-pane {
+    display: grid;
+  }
+}
+
 @media (max-width: 760px) {
   .statistics-grid {
     grid-template-columns: 1fr;
@@ -103,5 +117,15 @@
 
   .find-row label:not(.inline-check) {
     flex-basis: 100%;
+  }
+}
+
+@media (max-width: 620px) {
+  .workspace-grid.layout-preview.has-preview {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-grid.layout-preview.has-preview .preview-pane {
+    display: grid;
   }
 }
