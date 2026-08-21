@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Markora logo</title>
+  <desc id="desc">A rounded square with a folded Markdown page and a stylized M.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6d5dfc"/>
+      <stop offset="1" stop-color="#3f46b8"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eef0ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <path d="M136 92h168l72 72v256H136z" fill="url(#paper)"/>
+  <path d="M304 92v72h72" fill="#c9ccff"/>
+  <path d="M178 226v124h38v-66l40 48 40-48v66h38V226h-34l-44 54-44-54z" fill="#4b4fc4"/>
+  <path d="M184 384h144" stroke="#8b91d8" stroke-width="16" stroke-linecap="round"/>
+</svg>
