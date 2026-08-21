@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { CommandPalette } from './components/CommandPalette';
 import { EditorPane } from './components/EditorPane';
@@ -11,7 +11,8 @@ import { StatusBar } from './components/StatusBar';
 import { TabBar } from './components/TabBar';
 import { Toolbar } from './components/Toolbar';
 import { useWorkspace } from './hooks/useWorkspace';
-import { getBreadcrumb, getHeadings, isDirty } from './lib/document';
+import { getBreadcrumb, getCursorLine, getHeadings, isDirty } from './lib/document';
+import { applyMarkdownCommand, type MarkdownCommand } from './lib/editorCommands';
 import { openExternalUrl } from './lib/platform';
 import type { CommandAction, HeadingItem, PanelMode } from './types';
 
@@ -50,6 +51,27 @@ export default function App() {
   const breadcrumbs = useMemo(
     () => getBreadcrumb(headings, activeTab?.cursorLine ?? 1),
     [activeTab?.cursorLine, headings],
+  );
+
+  const applyEditorCommand = useCallback(
+    (command: MarkdownCommand) => {
+      const editor = editorRef.current;
+      if (!activeTab || !editor) return;
+
+      const result = applyMarkdownCommand(
+        activeTab.content,
+        editor.selectionStart,
+        editor.selectionEnd,
+        command,
+      );
+      updateActiveContent(result.content);
+      window.requestAnimationFrame(() => {
+        editor.focus();
+        editor.setSelectionRange(result.selectionStart, result.selectionEnd);
+        updateCursorLine(getCursorLine(result.content, result.selectionStart));
+      });
+    },
+    [activeTab, updateActiveContent, updateCursorLine],
   );
 
   useEffect(() => {
@@ -112,12 +134,18 @@ export default function App() {
       } else if (key === ',') {
         event.preventDefault();
         setSettingsOpen(true);
+      } else if (key === 'b') {
+        event.preventDefault();
+        applyEditorCommand('bold');
+      } else if (key === 'i') {
+        event.preventDefault();
+        applyEditorCommand('italic');
       }
     };
 
     window.addEventListener('keydown', handleShortcut);
     return () => window.removeEventListener('keydown', handleShortcut);
-  }, [newTab, openFile, saveActive]);
+  }, [applyEditorCommand, newTab, openFile, saveActive]);
 
   const handleOpenLink = async (url: string) => {
     const opened = await openExternalUrl(url);
@@ -161,12 +189,22 @@ export default function App() {
       { id: 'save', label: 'Save document', shortcut: 'Ctrl/⌘ S', keywords: ['file', 'disk'], run: () => void saveActive(false) },
       { id: 'save-as', label: 'Save document as…', shortcut: 'Ctrl/⌘ Shift S', keywords: ['file', 'copy'], run: () => void saveActive(true) },
       { id: 'find', label: 'Find and replace', shortcut: 'Ctrl/⌘ F', keywords: ['search', 'replace'], run: () => setFindOpen(true) },
+      { id: 'format-bold', label: 'Format selection as bold', shortcut: 'Ctrl/⌘ B', keywords: ['format', 'strong'], run: () => applyEditorCommand('bold') },
+      { id: 'format-italic', label: 'Format selection as italic', shortcut: 'Ctrl/⌘ I', keywords: ['format', 'emphasis'], run: () => applyEditorCommand('italic') },
+      { id: 'format-inline-code', label: 'Format selection as inline code', shortcut: null, keywords: ['format', 'code'], run: () => applyEditorCommand('inline-code') },
+      { id: 'format-heading', label: 'Toggle level 2 heading', shortcut: null, keywords: ['format', 'heading'], run: () => applyEditorCommand('heading') },
+      { id: 'format-quote', label: 'Toggle block quote', shortcut: null, keywords: ['format', 'quote'], run: () => applyEditorCommand('quote') },
+      { id: 'format-bullets', label: 'Toggle bullet list', shortcut: null, keywords: ['format', 'list'], run: () => applyEditorCommand('bullet-list') },
+      { id: 'format-numbered', label: 'Toggle numbered list', shortcut: null, keywords: ['format', 'list'], run: () => applyEditorCommand('ordered-list') },
+      { id: 'format-task', label: 'Toggle task list', shortcut: null, keywords: ['format', 'todo', 'checkbox'], run: () => applyEditorCommand('task-list') },
+      { id: 'format-code-block', label: 'Toggle fenced code block', shortcut: null, keywords: ['format', 'code', 'fence'], run: () => applyEditorCommand('code-block') },
+      { id: 'format-link', label: 'Insert Markdown link', shortcut: null, keywords: ['format', 'link', 'url'], run: () => applyEditorCommand('link') },
       { id: 'html', label: 'Export HTML', shortcut: null, keywords: ['export', 'web'], run: () => void exportHtml() },
       { id: 'pdf', label: 'Print / export PDF', shortcut: null, keywords: ['export', 'print'], run: exportPdf },
       { id: 'settings', label: 'Open settings', shortcut: 'Ctrl/⌘ ,', keywords: ['preferences', 'theme'], run: () => setSettingsOpen(true) },
       { id: 'focus', label: distractionFree ? 'Exit distraction-free mode' : 'Enter distraction-free mode', shortcut: null, keywords: ['focus', 'writing'], run: () => setDistractionFree((value) => !value) },
     ],
-    [distractionFree, exportHtml, newTab, openFile, saveActive],
+    [applyEditorCommand, distractionFree, exportHtml, newTab, openFile, saveActive],
   );
 
   if (!activeTab) return null;
@@ -191,6 +229,7 @@ export default function App() {
           onFind={() => setFindOpen(true)}
           onCommandPalette={() => setCommandOpen(true)}
           onSettings={() => setSettingsOpen(true)}
+          onFormat={applyEditorCommand}
           onToggleDistraction={() => setDistractionFree((value) => !value)}
         />
       ) : (
