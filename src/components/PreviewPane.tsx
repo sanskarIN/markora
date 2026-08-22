@@ -2,10 +2,11 @@ import { MarkdownBody } from '../lib/markdown';
 
 interface PreviewPaneProps {
   markdown: string;
+  fontFamily?: string;
   onOpenLink: (url: string) => void | Promise<void>;
 }
 
-export function PreviewPane({ markdown, onOpenLink }: PreviewPaneProps) {
+export function PreviewPane({ markdown, fontFamily, onOpenLink }: PreviewPaneProps) {
   return (
     <section className="preview-pane" aria-label="Markdown preview">
       <div className="pane-header">
@@ -17,7 +18,7 @@ export function PreviewPane({ markdown, onOpenLink }: PreviewPaneProps) {
           Sanitized
         </span>
       </div>
-      <article className="markdown-preview">
+      <article className="markdown-preview" style={{ fontFamily }}>
         {markdown.trim() ? (
           <MarkdownBody markdown={markdown} onOpenLink={onOpenLink} />
         ) : (
