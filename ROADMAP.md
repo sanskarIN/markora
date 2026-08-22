@@ -61,10 +61,10 @@ Implemented scope:
 - [x] Dedicated print/export settings for page size, margins, heading page-break behavior, code wrapping, and print metadata.
 - [x] PDF reproducibility investigation documented: platform print engines are retained for safety/portability, so cross-platform byte-identical PDFs are not claimed.
 - [x] Self-contained HTML export with inline local styles only and no automatic remote image requests.
-- [ ] Export templates with versioned configuration.
-- [ ] Workspace/session named presets.
+- [x] Versioned, validated export templates with built-in Standard/Compact/Code Review/Letter presets.
+- [x] Named local workspace/session presets for normalized settings and layout only; document contents are excluded.
 - [ ] Command-palette discoverability improvements and configurable shortcut mapping.
-- [ ] Better recovery diagnostics that never expose content in logs.
+- [x] Aggregate recovery diagnostics with tests proving safe log fields exclude document content, titles, and paths.
 
 ## v0.4 — Internationalization and accessibility expansion
 
