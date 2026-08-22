@@ -21,6 +21,17 @@ describe('markdown rendering', () => {
     expect(html).not.toContain('alert(1)</script>');
   });
 
+  it('keeps export styling self contained and local only', () => {
+    const html = renderMarkdownDocument('# Offline export', 'Offline');
+
+    expect(html).toContain('<style>');
+    expect(html).toContain('font-family:ui-sans-serif,system-ui');
+    expect(html).not.toMatch(/<link\b/i);
+    expect(html).not.toMatch(/<script\b[^>]*\bsrc=/i);
+    expect(html).not.toMatch(/@import\s+/i);
+    expect(html).not.toMatch(/url\s*\(\s*["']?https?:/i);
+  });
+
   it('does not emit remote image requests in exported content', () => {
     const html = renderMarkdownDocument('![Private](https://example.com/tracker.png)', 'Images');
     expect(html).not.toContain('<img');
