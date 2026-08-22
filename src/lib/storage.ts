@@ -1,4 +1,5 @@
 import { DEFAULT_SETTINGS, type DocumentTab, type EditorSettings, type RecentFile, type WorkspaceSnapshot } from '../types';
+import { normalizeFontPreset } from './fonts';
 
 const WORKSPACE_KEY = 'markora.workspace.v1';
 const ONBOARDING_KEY = 'markora.onboarding.v1';
@@ -47,6 +48,7 @@ function normalizeSettings(value: unknown): EditorSettings {
       editorTheme === 'graphite' || editorTheme === 'aurora' || editorTheme === 'paper'
         ? editorTheme
         : DEFAULT_SETTINGS.editorTheme,
+    fontPreset: normalizeFontPreset(value.fontPreset),
     fontSize:
       typeof value.fontSize === 'number' && value.fontSize >= 12 && value.fontSize <= 28
         ? value.fontSize

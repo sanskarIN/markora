@@ -1,10 +1,12 @@
 export type ThemeMode = 'system' | 'light' | 'dark';
 export type EditorTheme = 'graphite' | 'aurora' | 'paper';
+export type FontPreset = 'system-sans' | 'system-serif' | 'system-mono' | 'humanist-sans' | 'reading-serif';
 export type PanelMode = 'outline' | 'recent' | 'statistics';
 
 export interface EditorSettings {
   themeMode: ThemeMode;
   editorTheme: EditorTheme;
+  fontPreset: FontPreset;
   fontSize: number;
   lineHeight: number;
   wordWrap: boolean;
@@ -18,6 +20,7 @@ export interface EditorSettings {
 export const DEFAULT_SETTINGS: EditorSettings = {
   themeMode: 'system',
   editorTheme: 'graphite',
+  fontPreset: 'system-sans',
   fontSize: 16,
   lineHeight: 1.65,
   wordWrap: true,
