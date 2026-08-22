@@ -28,6 +28,24 @@ describe('workspace storage', () => {
     expect(loadWorkspace()?.tabs[0]?.content).toBe('# Test');
   });
 
+  it('migrates legacy settings without a font preset', () => {
+    const tab = createDocument('# Legacy', 'Legacy.md');
+    const snapshot: WorkspaceSnapshot = {
+      version: 1,
+      activeId: tab.id,
+      tabs: [tab],
+      recentFiles: [],
+      settings: DEFAULT_SETTINGS,
+      onboardingComplete: true,
+      savedAt: Date.now(),
+    };
+    const legacy = JSON.parse(JSON.stringify(snapshot)) as { settings: Record<string, unknown> };
+    delete legacy.settings.fontPreset;
+    localStorage.setItem('markora.workspace.v1', JSON.stringify(legacy));
+
+    expect(loadWorkspace()?.settings.fontPreset).toBe('system-sans');
+  });
+
   it('rejects malformed workspace data instead of trusting it', () => {
     localStorage.setItem('markora.workspace.v1', '{"version":1,"tabs":"oops"}');
     expect(loadWorkspace()).toBeNull();
