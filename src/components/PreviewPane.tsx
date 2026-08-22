@@ -1,3 +1,4 @@
+import { getHeadings } from '../lib/document';
 import { MarkdownBody } from '../lib/markdown';
 
 interface PreviewPaneProps {
@@ -9,6 +10,8 @@ interface PreviewPaneProps {
 export function PreviewPane({ markdown, fontFamily, onOpenLink }: PreviewPaneProps) {
   const resolvedFontFamily =
     fontFamily ?? 'var(--writing-font, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif)';
+  const printTitle = getHeadings(markdown)[0]?.text || 'Markdown document';
+  const printDate = new Date().toLocaleDateString();
 
   return (
     <section className="preview-pane" aria-label="Markdown preview">
@@ -22,6 +25,10 @@ export function PreviewPane({ markdown, fontFamily, onOpenLink }: PreviewPanePro
         </span>
       </div>
       <article className="markdown-preview" style={{ fontFamily: resolvedFontFamily }}>
+        <aside className="print-metadata" aria-hidden="true" style={{ display: 'none' }}>
+          <strong>{printTitle}</strong>
+          <span>Printed from Markora · {printDate}</span>
+        </aside>
         {markdown.trim() ? (
           <MarkdownBody markdown={markdown} onOpenLink={onOpenLink} />
         ) : (
