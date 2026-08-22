@@ -7,6 +7,7 @@ interface EditorPaneProps {
   title: string;
   content: string;
   breadcrumbs: HeadingItem[];
+  fontFamily?: string;
   fontSize: number;
   lineHeight: number;
   wordWrap: boolean;
@@ -19,6 +20,7 @@ export const EditorPane = forwardRef<HTMLTextAreaElement, EditorPaneProps>(funct
     title,
     content,
     breadcrumbs,
+    fontFamily,
     fontSize,
     lineHeight,
     wordWrap,
@@ -61,7 +63,7 @@ export const EditorPane = forwardRef<HTMLTextAreaElement, EditorPaneProps>(funct
         spellCheck="true"
         value={content}
         wrap={wordWrap ? 'soft' : 'off'}
-        style={{ fontSize: `${fontSize}px`, lineHeight }}
+        style={{ fontFamily, fontSize: `${fontSize}px`, lineHeight }}
         onChange={(event) => onChange(event.target.value)}
         onClick={(event) => updateCursor(event.currentTarget)}
         onKeyUp={(event) => updateCursor(event.currentTarget)}
