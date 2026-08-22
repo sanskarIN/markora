@@ -28,7 +28,7 @@ describe('workspace storage', () => {
     expect(loadWorkspace()?.tabs[0]?.content).toBe('# Test');
   });
 
-  it('migrates legacy settings without a font preset', () => {
+  it('migrates legacy settings without newer appearance and print preferences', () => {
     const tab = createDocument('# Legacy', 'Legacy.md');
     const snapshot: WorkspaceSnapshot = {
       version: 1,
@@ -41,9 +41,20 @@ describe('workspace storage', () => {
     };
     const legacy = JSON.parse(JSON.stringify(snapshot)) as { settings: Record<string, unknown> };
     delete legacy.settings.fontPreset;
+    delete legacy.settings.printPageSize;
+    delete legacy.settings.printMarginMm;
+    delete legacy.settings.printKeepHeadings;
+    delete legacy.settings.printCodeWrap;
+    delete legacy.settings.printMetadata;
     localStorage.setItem('markora.workspace.v1', JSON.stringify(legacy));
 
-    expect(loadWorkspace()?.settings.fontPreset).toBe('system-sans');
+    const settings = loadWorkspace()?.settings;
+    expect(settings?.fontPreset).toBe(DEFAULT_SETTINGS.fontPreset);
+    expect(settings?.printPageSize).toBe(DEFAULT_SETTINGS.printPageSize);
+    expect(settings?.printMarginMm).toBe(DEFAULT_SETTINGS.printMarginMm);
+    expect(settings?.printKeepHeadings).toBe(DEFAULT_SETTINGS.printKeepHeadings);
+    expect(settings?.printCodeWrap).toBe(DEFAULT_SETTINGS.printCodeWrap);
+    expect(settings?.printMetadata).toBe(DEFAULT_SETTINGS.printMetadata);
   });
 
   it('rejects malformed workspace data instead of trusting it', () => {
