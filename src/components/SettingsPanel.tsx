@@ -5,7 +5,9 @@ import type { LayoutMode } from '../lib/layout';
 import { getAppVersion } from '../lib/platform';
 import { buildPrintStyle } from '../lib/print';
 import type { DocumentTab, EditorSettings } from '../types';
+import { ExportTemplatePicker } from './ExportTemplatePicker';
 import { RecoveryInspector } from './RecoveryInspector';
+import { SessionPresetManager } from './SessionPresetManager';
 
 interface SettingsPanelProps {
   open: boolean;
@@ -236,6 +238,21 @@ export function SettingsPanel({
             <p className="settings-note">
               These options generate a bounded local print stylesheet. PDF creation still uses the system/browser print dialog.
             </p>
+            <ExportTemplatePicker onUpdate={onUpdate} />
+          </SettingsSection>
+
+          <SettingsSection
+            title="Workspace presets"
+            description="Save named local preference/layout combinations for different writing workflows."
+          >
+            <SessionPresetManager
+              settings={settings}
+              layoutMode={layoutMode}
+              editorPanePercent={editorPanePercent}
+              onUpdateSettings={onUpdate}
+              onLayoutModeChange={onLayoutModeChange}
+              onEditorPanePercentChange={onEditorPanePercentChange}
+            />
           </SettingsSection>
 
           <SettingsSection
