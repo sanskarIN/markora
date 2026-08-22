@@ -32,6 +32,9 @@ export const EditorPane = forwardRef<HTMLTextAreaElement, EditorPaneProps>(funct
   const updateCursor = (target: HTMLTextAreaElement) => {
     onCursorLineChange(getCursorLine(target.value, target.selectionStart));
   };
+  const resolvedFontFamily =
+    fontFamily ??
+    'var(--writing-font, ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace)';
 
   return (
     <section className="editor-pane" aria-label="Markdown editor">
@@ -63,7 +66,7 @@ export const EditorPane = forwardRef<HTMLTextAreaElement, EditorPaneProps>(funct
         spellCheck="true"
         value={content}
         wrap={wordWrap ? 'soft' : 'off'}
-        style={{ fontFamily, fontSize: `${fontSize}px`, lineHeight }}
+        style={{ fontFamily: resolvedFontFamily, fontSize: `${fontSize}px`, lineHeight }}
         onChange={(event) => onChange(event.target.value)}
         onClick={(event) => updateCursor(event.currentTarget)}
         onKeyUp={(event) => updateCursor(event.currentTarget)}
