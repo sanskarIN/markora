@@ -60,7 +60,11 @@ export function MarkdownBody({ markdown, onOpenLink }: MarkdownBodyProps) {
             {children}
           </SafeLink>
         ),
-        img: ({ alt }) => <span className="blocked-image" role="img" aria-label={alt || 'Image'}>{alt ? `[Image: ${alt}]` : '[Image]'}</span>,
+        img: ({ alt }) => (
+          <span className="blocked-image" role="img" aria-label={alt || 'Image'}>
+            {alt ? `[Image: ${alt}]` : '[Image]'}
+          </span>
+        ),
       }}
     >
       {markdown}
@@ -112,7 +116,7 @@ export function renderMarkdownDocument(markdown: string, title: string): string 
 <meta name="referrer" content="no-referrer" />
 <title>${safeTitle}</title>
 <style>
-:root{color-scheme:light dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{max-width:860px;margin:0 auto;padding:48px 24px;line-height:1.7;background:#fff;color:#18202b}h1,h2,h3,h4,h5,h6{line-height:1.25;margin-top:1.7em}a{color:#4b63d3}pre{overflow:auto;padding:16px;border-radius:10px;background:#111827;color:#e5e7eb}code{font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace}table{border-collapse:collapse;width:100%}th,td{border:1px solid #d7dce3;padding:8px 10px;text-align:left}blockquote{margin-left:0;padding-left:16px;border-left:4px solid #c7ccd5;color:#58606e}.blocked-image{display:inline-block;padding:4px 8px;border:1px dashed #aab1bc;border-radius:6px;color:#687180}@media(prefers-color-scheme:dark){body{background:#12151b;color:#e8ebf0}a{color:#9aabff}th,td{border-color:#3b4350}blockquote{border-color:#596579;color:#aeb6c4}}
+:root{color-scheme:light dark;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{max-width:860px;margin:0 auto;padding:48px 24px;line-height:1.7;background:#fff;color:#18202b}h1,h2,h3,h4,h5,h6{line-height:1.25;margin-top:1.7em}a{color:#4b63d3}pre{overflow:auto;padding:16px;border-radius:10px;background:#111827;color:#e5e7eb}code{font-family:ui-monospace,"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}table{border-collapse:collapse;width:100%}th,td{border:1px solid #d7dce3;padding:8px 10px;text-align:left}blockquote{margin-left:0;padding-left:16px;border-left:4px solid #c7ccd5;color:#58606e}.blocked-image{display:inline-block;padding:4px 8px;border:1px dashed #aab1bc;border-radius:6px;color:#687180}@media(prefers-color-scheme:dark){body{background:#12151b;color:#e8ebf0}a{color:#9aabff}th,td{border-color:#3b4350}blockquote{border-color:#596579;color:#aeb6c4}}
 </style>
 </head>
 <body>
