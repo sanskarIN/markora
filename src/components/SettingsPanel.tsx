@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 
-import type { LayoutMode } from '../lib/layout';
 import { getLocalFontStack, LOCAL_FONT_PRESETS } from '../lib/fonts';
+import type { LayoutMode } from '../lib/layout';
 import { getAppVersion } from '../lib/platform';
+import { buildPrintStyle } from '../lib/print';
 import type { DocumentTab, EditorSettings } from '../types';
 import { RecoveryInspector } from './RecoveryInspector';
 
@@ -52,6 +53,20 @@ export function SettingsPanel({
   useEffect(() => {
     document.documentElement.style.setProperty('--writing-font', getLocalFontStack(settings.fontPreset));
   }, [settings.fontPreset]);
+
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.id = 'markora-print-settings';
+    style.textContent = buildPrintStyle(settings);
+    document.head.append(style);
+    return () => style.remove();
+  }, [
+    settings.printCodeWrap,
+    settings.printKeepHeadings,
+    settings.printMarginMm,
+    settings.printMetadata,
+    settings.printPageSize,
+  ]);
 
   useEffect(() => {
     if (!open) return;
@@ -175,6 +190,52 @@ export function SettingsPanel({
               checked={settings.showPreview}
               onChange={(showPreview) => onUpdate({ showPreview })}
             />
+          </SettingsSection>
+
+          <SettingsSection
+            title="Print & PDF"
+            description="Control the operating-system print/PDF output without adding a network service."
+          >
+            <SettingRow label="Page size">
+              <select
+                value={settings.printPageSize}
+                onChange={(event) =>
+                  onUpdate({ printPageSize: event.target.value as EditorSettings['printPageSize'] })
+                }
+              >
+                <option value="auto">Printer default</option>
+                <option value="a4">A4</option>
+                <option value="letter">US Letter</option>
+              </select>
+            </SettingRow>
+            <SettingRow label={`Page margin — ${settings.printMarginMm} mm`}>
+              <input
+                type="range"
+                min="5"
+                max="35"
+                step="1"
+                value={settings.printMarginMm}
+                onChange={(event) => onUpdate({ printMarginMm: Number(event.target.value) })}
+              />
+            </SettingRow>
+            <Toggle
+              label="Keep headings with following content"
+              checked={settings.printKeepHeadings}
+              onChange={(printKeepHeadings) => onUpdate({ printKeepHeadings })}
+            />
+            <Toggle
+              label="Wrap long code lines"
+              checked={settings.printCodeWrap}
+              onChange={(printCodeWrap) => onUpdate({ printCodeWrap })}
+            />
+            <Toggle
+              label="Include print metadata header"
+              checked={settings.printMetadata}
+              onChange={(printMetadata) => onUpdate({ printMetadata })}
+            />
+            <p className="settings-note">
+              These options generate a bounded local print stylesheet. PDF creation still uses the system/browser print dialog.
+            </p>
           </SettingsSection>
 
           <SettingsSection
