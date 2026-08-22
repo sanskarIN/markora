@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import type { LayoutMode } from '../lib/layout';
+import { getLocalFontStack, LOCAL_FONT_PRESETS } from '../lib/fonts';
 import { getAppVersion } from '../lib/platform';
 import type { DocumentTab, EditorSettings } from '../types';
 import { RecoveryInspector } from './RecoveryInspector';
@@ -47,6 +48,10 @@ export function SettingsPanel({
   onClose,
 }: SettingsPanelProps) {
   const [version, setVersion] = useState('0.1.0');
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--writing-font', getLocalFontStack(settings.fontPreset));
+  }, [settings.fontPreset]);
 
   useEffect(() => {
     if (!open) return;
@@ -100,6 +105,23 @@ export function SettingsPanel({
                 <option value="paper">Paper</option>
               </select>
             </SettingRow>
+            <SettingRow label="Writing font">
+              <select
+                value={settings.fontPreset}
+                onChange={(event) =>
+                  onUpdate({ fontPreset: event.target.value as EditorSettings['fontPreset'] })
+                }
+              >
+                {LOCAL_FONT_PRESETS.map((preset) => (
+                  <option key={preset.id} value={preset.id} title={preset.description}>
+                    {preset.label}
+                  </option>
+                ))}
+              </select>
+            </SettingRow>
+            <p className="settings-note">
+              Writing fonts use local/system font stacks only. Markora never downloads a remote font.
+            </p>
             <SettingRow label="Workspace layout">
               <select
                 value={layoutMode}
