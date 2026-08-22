@@ -1,6 +1,7 @@
 export type ThemeMode = 'system' | 'light' | 'dark';
 export type EditorTheme = 'graphite' | 'aurora' | 'paper';
 export type FontPreset = 'system-sans' | 'system-serif' | 'system-mono' | 'humanist-sans' | 'reading-serif';
+export type PrintPageSize = 'auto' | 'a4' | 'letter';
 export type PanelMode = 'outline' | 'recent' | 'statistics';
 
 export interface EditorSettings {
@@ -15,6 +16,11 @@ export interface EditorSettings {
   reducedMotion: boolean;
   showOutline: boolean;
   showPreview: boolean;
+  printPageSize: PrintPageSize;
+  printMarginMm: number;
+  printKeepHeadings: boolean;
+  printCodeWrap: boolean;
+  printMetadata: boolean;
 }
 
 export const DEFAULT_SETTINGS: EditorSettings = {
@@ -29,6 +35,11 @@ export const DEFAULT_SETTINGS: EditorSettings = {
   reducedMotion: false,
   showOutline: true,
   showPreview: true,
+  printPageSize: 'auto',
+  printMarginMm: 18,
+  printKeepHeadings: true,
+  printCodeWrap: true,
+  printMetadata: true,
 };
 
 export interface DocumentTab {
