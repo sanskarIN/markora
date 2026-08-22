@@ -1,5 +1,6 @@
 import { DEFAULT_SETTINGS, type DocumentTab, type EditorSettings, type RecentFile, type WorkspaceSnapshot } from '../types';
 import { normalizeFontPreset } from './fonts';
+import { normalizePrintMarginMm, normalizePrintPageSize } from './print';
 
 const WORKSPACE_KEY = 'markora.workspace.v1';
 const ONBOARDING_KEY = 'markora.onboarding.v1';
@@ -69,6 +70,16 @@ function normalizeSettings(value: unknown): EditorSettings {
       typeof value.showOutline === 'boolean' ? value.showOutline : DEFAULT_SETTINGS.showOutline,
     showPreview:
       typeof value.showPreview === 'boolean' ? value.showPreview : DEFAULT_SETTINGS.showPreview,
+    printPageSize: normalizePrintPageSize(value.printPageSize),
+    printMarginMm: normalizePrintMarginMm(value.printMarginMm),
+    printKeepHeadings:
+      typeof value.printKeepHeadings === 'boolean'
+        ? value.printKeepHeadings
+        : DEFAULT_SETTINGS.printKeepHeadings,
+    printCodeWrap:
+      typeof value.printCodeWrap === 'boolean' ? value.printCodeWrap : DEFAULT_SETTINGS.printCodeWrap,
+    printMetadata:
+      typeof value.printMetadata === 'boolean' ? value.printMetadata : DEFAULT_SETTINGS.printMetadata,
   };
 }
 
