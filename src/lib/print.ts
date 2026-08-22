@@ -27,5 +27,5 @@ export function buildPrintStyle(settings: Pick<
   const codeWhiteSpace = settings.printCodeWrap ? 'pre-wrap' : 'pre';
   const metadataDisplay = settings.printMetadata ? 'block' : 'none';
 
-  return `@media print{@page{size:${pageSize};margin:${margin}mm}.markdown-preview pre{white-space:${codeWhiteSpace}!important}.print-metadata{display:${metadataDisplay}!important}${headingRule}}`;
+  return `@media print{@page{size:${pageSize};margin:${margin}mm}.markdown-preview pre{white-space:${codeWhiteSpace}!important}.print-metadata{display:${metadataDisplay}!important;margin:0 0 10mm;padding:0 0 5mm;border-bottom:1px solid #bbb;color:#333;font-family:ui-sans-serif,system-ui,sans-serif;font-size:9pt;line-height:1.4}.print-metadata strong{display:block;margin-bottom:1mm;color:#111;font-size:14pt}${headingRule}}`;
 }
