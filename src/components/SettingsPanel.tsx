@@ -8,6 +8,7 @@ import type { DocumentTab, EditorSettings } from '../types';
 import { ExportTemplatePicker } from './ExportTemplatePicker';
 import { RecoveryInspector } from './RecoveryInspector';
 import { SessionPresetManager } from './SessionPresetManager';
+import { ShortcutSettings } from './ShortcutSettings';
 
 interface SettingsPanelProps {
   open: boolean;
@@ -253,6 +254,13 @@ export function SettingsPanel({
               onLayoutModeChange={onLayoutModeChange}
               onEditorPanePercentChange={onEditorPanePercentChange}
             />
+          </SettingsSection>
+
+          <SettingsSection
+            title="Keyboard shortcuts"
+            description="Remap core Ctrl/Command shortcuts locally without changing command behavior."
+          >
+            <ShortcutSettings />
           </SettingsSection>
 
           <SettingsSection
