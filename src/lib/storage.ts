@@ -38,7 +38,7 @@ function isRecentFile(value: unknown): value is RecentFile {
   );
 }
 
-function normalizeSettings(value: unknown): EditorSettings {
+export function normalizeEditorSettings(value: unknown): EditorSettings {
   if (!isRecord(value)) return DEFAULT_SETTINGS;
 
   const themeMode = value.themeMode;
@@ -164,7 +164,7 @@ function parseWorkspace(raw: string): WorkspaceSnapshot {
     activeId: parsed.activeId,
     tabs: parsed.tabs,
     recentFiles,
-    settings: normalizeSettings(parsed.settings),
+    settings: normalizeEditorSettings(parsed.settings),
     onboardingComplete:
       typeof parsed.onboardingComplete === 'boolean' ? parsed.onboardingComplete : false,
     savedAt: typeof parsed.savedAt === 'number' && Number.isFinite(parsed.savedAt) ? parsed.savedAt : Date.now(),
