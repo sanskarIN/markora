@@ -44,23 +44,23 @@ This roadmap prioritizes coherent improvements to the Markdown writing experienc
 
 ## v0.2 — Editing depth
 
-Candidate scope after v0.1 verification:
+Implemented scope:
 
-- [ ] Undo-safe structural Markdown commands for headings, lists, quotes, code fences, links, and emphasis.
-- [ ] Optional split-or-editor-only/preview-only layout presets with persisted pane ratios.
-- [ ] Better large-document heading virtualization/search.
-- [ ] Find history and whole-word/regex modes with explicit safe UX.
-- [ ] Document statistics panel with reading time and heading/list/code counts.
-- [ ] More robust session restore controls and per-tab recovery inspection.
-- [ ] Optional local file-change detection with conflict-safe reload/compare UX.
-- [ ] Drag-and-drop open for validated Markdown files.
-- [ ] User-selectable local fonts without remote font loading.
+- [x] Undo-safe structural Markdown commands for headings, lists, quotes, code fences, links, and emphasis.
+- [x] Split/editor-only/preview-only layout presets with persisted pane ratios.
+- [x] Large-document heading virtualization and outline search.
+- [x] Find history plus whole-word and regex modes with explicit safe UX.
+- [x] Document statistics panel with reading time and heading/list/code counts.
+- [x] Session restore controls and per-tab recovery inspection.
+- [x] Local file-change fingerprinting with conflict-safe autosave/save guards and explicit disk reload UX.
+- [x] Drag-and-drop open for validated Markdown files.
+- [x] User-selectable local/system font presets without remote font loading.
 
 ## v0.3 — Export and workflow polish
 
 - [ ] Dedicated print/export settings for page size, margins, headings, code wrapping, and metadata.
 - [ ] Reproducible PDF export investigation that preserves the safe renderer boundary.
-- [ ] Self-contained HTML export option with local styles only.
+- [x] Self-contained HTML export with inline local styles only and no automatic remote image requests.
 - [ ] Export templates with versioned configuration.
 - [ ] Workspace/session named presets.
 - [ ] Command-palette discoverability improvements and configurable shortcut mapping.
