@@ -7,6 +7,9 @@ interface PreviewPaneProps {
 }
 
 export function PreviewPane({ markdown, fontFamily, onOpenLink }: PreviewPaneProps) {
+  const resolvedFontFamily =
+    fontFamily ?? 'var(--writing-font, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif)';
+
   return (
     <section className="preview-pane" aria-label="Markdown preview">
       <div className="pane-header">
@@ -18,7 +21,7 @@ export function PreviewPane({ markdown, fontFamily, onOpenLink }: PreviewPanePro
           Sanitized
         </span>
       </div>
-      <article className="markdown-preview" style={{ fontFamily }}>
+      <article className="markdown-preview" style={{ fontFamily: resolvedFontFamily }}>
         {markdown.trim() ? (
           <MarkdownBody markdown={markdown} onOpenLink={onOpenLink} />
         ) : (
