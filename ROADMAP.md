@@ -63,7 +63,7 @@ Implemented scope:
 - [x] Self-contained HTML export with inline local styles only and no automatic remote image requests.
 - [x] Versioned, validated export templates with built-in Standard/Compact/Code Review/Letter presets.
 - [x] Named local workspace/session presets for normalized settings and layout only; document contents are excluded.
-- [ ] Command-palette discoverability improvements and configurable shortcut mapping.
+- [x] Command-palette discoverability plus local configurable Ctrl/Command shortcut mapping with duplicate detection and reset-to-defaults.
 - [x] Aggregate recovery diagnostics with tests proving safe log fields exclude document content, titles, and paths.
 
 ## v0.4 — Internationalization and accessibility expansion
