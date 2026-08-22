@@ -58,8 +58,8 @@ Implemented scope:
 
 ## v0.3 — Export and workflow polish
 
-- [ ] Dedicated print/export settings for page size, margins, headings, code wrapping, and metadata.
-- [ ] Reproducible PDF export investigation that preserves the safe renderer boundary.
+- [x] Dedicated print/export settings for page size, margins, heading page-break behavior, code wrapping, and print metadata.
+- [x] PDF reproducibility investigation documented: platform print engines are retained for safety/portability, so cross-platform byte-identical PDFs are not claimed.
 - [x] Self-contained HTML export with inline local styles only and no automatic remote image requests.
 - [ ] Export templates with versioned configuration.
 - [ ] Workspace/session named presets.
