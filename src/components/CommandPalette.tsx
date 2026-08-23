@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import { useI18n } from '../i18n';
 import type { CommandAction } from '../types';
 
 interface CommandPaletteProps {
@@ -9,6 +10,7 @@ interface CommandPaletteProps {
 }
 
 export function CommandPalette({ open, actions, onClose }: CommandPaletteProps) {
+  const { t } = useI18n();
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -45,14 +47,14 @@ export function CommandPalette({ open, actions, onClose }: CommandPaletteProps) 
         className="command-palette"
         role="dialog"
         aria-modal="true"
-        aria-label="Command palette"
+        aria-label={t('commandPalette')}
         onMouseDown={(event) => event.stopPropagation()}
       >
         <input
           autoFocus
           className="command-search"
           type="search"
-          placeholder="Type a command…"
+          placeholder={t('typeCommand')}
           value={query}
           onChange={(event) => {
             setQuery(event.target.value);
@@ -75,7 +77,7 @@ export function CommandPalette({ open, actions, onClose }: CommandPaletteProps) 
           }}
         />
 
-        <div className="command-list" role="listbox" aria-label="Available commands">
+        <div className="command-list" role="listbox" aria-label={t('availableCommands')}>
           {filtered.length ? (
             filtered.map((action, index) => (
               <button
@@ -93,8 +95,8 @@ export function CommandPalette({ open, actions, onClose }: CommandPaletteProps) 
             ))
           ) : (
             <div className="empty-state compact">
-              <strong>No matching commands</strong>
-              <p>Try a different word.</p>
+              <strong>{t('noMatchingCommands')}</strong>
+              <p>{t('tryDifferentWord')}</p>
             </div>
           )}
         </div>
