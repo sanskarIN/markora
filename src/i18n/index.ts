@@ -9,16 +9,18 @@ import {
 } from 'react';
 
 import { en, type TranslationKey } from './en';
+import { extraEn, extraHi, type ExtraTranslationKey } from './extras';
 import { hi } from './hi';
 
 export type Locale = 'en' | 'hi';
+export type AppTranslationKey = TranslationKey | ExtraTranslationKey;
 export type TranslationValues = Record<string, string | number>;
 
 const LOCALE_STORAGE_KEY = 'markora.locale.v1';
 
-const catalogs: Record<Locale, Record<TranslationKey, string>> = {
-  en,
-  hi,
+const catalogs: Record<Locale, Record<AppTranslationKey, string>> = {
+  en: { ...en, ...extraEn },
+  hi: { ...hi, ...extraHi },
 };
 
 export const SUPPORTED_LOCALES: readonly Locale[] = ['en', 'hi'];
@@ -38,10 +40,10 @@ function getInitialLocale(): Locale {
 
 export function translate(
   locale: Locale,
-  key: TranslationKey,
+  key: AppTranslationKey,
   values: TranslationValues = {},
 ): string {
-  const template = catalogs[locale][key] ?? en[key];
+  const template = catalogs[locale][key] ?? catalogs.en[key];
   return template.replace(/\{([a-zA-Z0-9_]+)\}/g, (match, token: string) => {
     const value = values[token];
     return value === undefined ? match : String(value);
@@ -51,7 +53,7 @@ export function translate(
 interface I18nContextValue {
   locale: Locale;
   setLocale: (locale: Locale) => void;
-  t: (key: TranslationKey, values?: TranslationValues) => string;
+  t: (key: AppTranslationKey, values?: TranslationValues) => string;
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
