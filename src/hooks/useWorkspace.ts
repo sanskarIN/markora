@@ -1,13 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import {
-  DEFAULT_SETTINGS,
-  type DocumentTab,
-  type EditorSettings,
-  type RecentFile,
-  type ToastMessage,
-  type WorkspaceSnapshot,
-} from '../types';
+import { useI18n, type AppTranslationKey, type TranslationValues } from '../i18n';
 import { createDocument, createId, deriveFileName, isDirty, WELCOME_MARKDOWN } from '../lib/document';
 import { limitDroppedItems, readDroppedBrowserFile } from '../lib/fileDrop';
 import { logger } from '../lib/logging';
@@ -31,6 +24,14 @@ import {
   saveOnboardingComplete,
   saveWorkspace,
 } from '../lib/storage';
+import {
+  DEFAULT_SETTINGS,
+  type DocumentTab,
+  type EditorSettings,
+  type RecentFile,
+  type ToastMessage,
+  type WorkspaceSnapshot,
+} from '../types';
 
 interface WorkspaceState {
   tabs: DocumentTab[];
@@ -39,6 +40,8 @@ interface WorkspaceState {
   settings: EditorSettings;
   onboardingComplete: boolean;
 }
+
+type Translator = (key: AppTranslationKey, values?: TranslationValues) => string;
 
 function initialWorkspace(): WorkspaceState {
   const recovered = loadWorkspace();
@@ -63,6 +66,7 @@ function initialWorkspace(): WorkspaceState {
 }
 
 export function useWorkspace() {
+  const { t } = useI18n();
   const [state, setState] = useState<WorkspaceState>(initialWorkspace);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const initialRecoveryRef = useRef(loadWorkspace() !== null);
@@ -153,10 +157,7 @@ export function useWorkspace() {
             if (unverifiedRecoveredPathsRef.current.has(path)) {
               if (!conflictWarningsRef.current.has(path)) {
                 conflictWarningsRef.current.add(path);
-                notify(
-                  'warning',
-                  `Autosave paused for recovered ${tab.title}. Save manually once to verify the disk copy.`,
-                );
+                notify('warning', t('autosaveRecoveredPaused', { title: tab.title }));
               }
               return;
             }
@@ -164,10 +165,7 @@ export function useWorkspace() {
             if (await hasExternalChange(path)) {
               if (!conflictWarningsRef.current.has(path)) {
                 conflictWarningsRef.current.add(path);
-                notify(
-                  'warning',
-                  `${tab.title} changed outside Markora. Autosave paused to protect the external edits.`,
-                );
+                notify('warning', t('autosaveExternalPaused', { title: tab.title }));
               }
               return;
             }
@@ -185,7 +183,7 @@ export function useWorkspace() {
             }));
           } catch (error: unknown) {
             logger.error('autosave_failed', { message: errorMessage(error) });
-            notify('warning', `Autosave failed for ${tab.title}. Your recovery copy is still local.`);
+            notify('warning', t('autosaveFailed', { title: tab.title }));
           }
         })();
       }
@@ -199,6 +197,7 @@ export function useWorkspace() {
     state.settings.autosave,
     state.settings.autosaveDelayMs,
     state.tabs,
+    t,
   ]);
 
   const setActiveId = useCallback((activeId: string) => {
@@ -234,7 +233,7 @@ export function useWorkspace() {
     setState((current) => {
       const tab = current.tabs.find((item) => item.id === id);
       if (!tab) return current;
-      if (isDirty(tab) && !window.confirm(`Close ${tab.title} without saving?`)) return current;
+      if (isDirty(tab) && !window.confirm(t('closeUnsavedConfirm', { title: tab.title }))) return current;
 
       if (tab.path) {
         diskFingerprintsRef.current.delete(tab.path);
@@ -255,7 +254,7 @@ export function useWorkspace() {
           : current.activeId;
       return { ...current, tabs: remaining, activeId: nextActive };
     });
-  }, []);
+  }, [t]);
 
   const openFile = useCallback(async () => {
     try {
@@ -263,12 +262,12 @@ export function useWorkspace() {
       if (!opened) return;
       setState((current) => insertOpenedFile(current, opened.path, opened.name, opened.content));
       await rememberFingerprint(opened.path);
-      notify('success', 'File opened.');
+      notify('success', t('fileOpened'));
     } catch (error: unknown) {
       logger.error('open_file_failed', { message: errorMessage(error) });
-      notify('error', errorMessage(error));
+      notify('error', errorMessage(error, t('unexpectedError')));
     }
-  }, [notify, rememberFingerprint]);
+  }, [notify, rememberFingerprint, t]);
 
   const openRecent = useCallback(
     async (path: string) => {
@@ -276,17 +275,17 @@ export function useWorkspace() {
         const opened = await readMarkdownFile(path);
         setState((current) => insertOpenedFile(current, opened.path, opened.name, opened.content));
         await rememberFingerprint(opened.path);
-        notify('success', 'File opened.');
+        notify('success', t('fileOpened'));
       } catch (error: unknown) {
         logger.warn('open_recent_failed', { message: errorMessage(error) });
         setState((current) => ({
           ...current,
           recentFiles: current.recentFiles.filter((file) => file.path !== path),
         }));
-        notify('error', 'The recent file is no longer available.');
+        notify('error', t('recentUnavailable'));
       }
     },
-    [notify, rememberFingerprint],
+    [notify, rememberFingerprint, t],
   );
 
   const openDroppedPaths = useCallback(
@@ -310,9 +309,9 @@ export function useWorkspace() {
         }
       }
 
-      notifyDroppedFileResult(notify, openedCount, failedCount, uniquePaths.length - limited.length, lastError);
+      notifyDroppedFileResult(notify, t, openedCount, failedCount, uniquePaths.length - limited.length, lastError);
     },
-    [notify, rememberFingerprint],
+    [notify, rememberFingerprint, t],
   );
 
   const openDroppedBrowserFiles = useCallback(
@@ -334,9 +333,9 @@ export function useWorkspace() {
         }
       }
 
-      notifyDroppedFileResult(notify, openedCount, failedCount, files.length - limited.length, lastError);
+      notifyDroppedFileResult(notify, t, openedCount, failedCount, files.length - limited.length, lastError);
     },
-    [notify],
+    [notify, t],
   );
 
   const saveActive = useCallback(
@@ -347,16 +346,12 @@ export function useWorkspace() {
       try {
         if (!saveAs && tab.path && isDesktopRuntime()) {
           if (unverifiedRecoveredPathsRef.current.has(tab.path)) {
-            const overwrite = window.confirm(
-              `${tab.title} was recovered from a previous session. Markora cannot verify whether the disk file changed while the app was closed. Overwrite the disk file with the recovered version?`,
-            );
+            const overwrite = window.confirm(t('recoveredOverwriteConfirm', { title: tab.title }));
             if (!overwrite) return;
           } else if (await hasExternalChange(tab.path)) {
-            const overwrite = window.confirm(
-              `${tab.title} changed on disk since Markora opened or saved it. Overwrite those external changes?`,
-            );
+            const overwrite = window.confirm(t('externalOverwriteConfirm', { title: tab.title }));
             if (!overwrite) {
-              notify('warning', 'Save cancelled to protect the external file changes.');
+              notify('warning', t('saveCancelledExternal'));
               return;
             }
           }
@@ -376,23 +371,23 @@ export function useWorkspace() {
             ? addRecent(current.recentFiles, saved.path, saved.name)
             : current.recentFiles,
         }));
-        notify('success', 'File saved.');
+        notify('success', t('fileSaved'));
       } catch (error: unknown) {
         logger.error('save_file_failed', { message: errorMessage(error) });
-        notify('error', errorMessage(error));
+        notify('error', errorMessage(error, t('unexpectedError')));
       }
     },
-    [hasExternalChange, notify, rememberFingerprint, state.activeId, state.tabs],
+    [hasExternalChange, notify, rememberFingerprint, state.activeId, state.tabs, t],
   );
 
   const reloadActiveFromDisk = useCallback(async () => {
     const tab = state.tabs.find((item) => item.id === state.activeId);
     if (!tab?.path) {
-      notify('info', 'This document is not connected to a disk file yet.');
+      notify('info', t('notDiskConnected'));
       return;
     }
 
-    if (isDirty(tab) && !window.confirm(`Reload ${tab.title} from disk and discard unsaved editor changes?`)) {
+    if (isDirty(tab) && !window.confirm(t('reloadDiscardConfirm', { title: tab.title }))) {
       return;
     }
 
@@ -418,41 +413,41 @@ export function useWorkspace() {
           : current.recentFiles,
       }));
       await rememberFingerprint(opened.path);
-      notify('success', 'Reloaded the latest disk version.');
+      notify('success', t('reloadedDisk'));
     } catch (error: unknown) {
       logger.warn('reload_file_failed', { message: errorMessage(error) });
-      notify('error', errorMessage(error));
+      notify('error', errorMessage(error, t('unexpectedError')));
     }
-  }, [notify, rememberFingerprint, state.activeId, state.tabs]);
+  }, [notify, rememberFingerprint, state.activeId, state.tabs, t]);
 
   const exportHtml = useCallback(async () => {
     if (!activeTab) return;
     try {
       const html = renderMarkdownDocument(activeTab.content, activeTab.title);
       const result = await exportHtmlFile(html, activeTab.title);
-      if (result) notify('success', 'HTML export created.');
+      if (result) notify('success', t('htmlExportCreated'));
     } catch (error: unknown) {
       logger.error('html_export_failed', { message: errorMessage(error) });
-      notify('error', errorMessage(error));
+      notify('error', errorMessage(error, t('unexpectedError')));
     }
-  }, [activeTab, notify]);
+  }, [activeTab, notify, t]);
 
   const exportBackup = useCallback(async () => {
     try {
       const result = await saveBackupFile(exportBackupPayload(snapshot));
-      if (result) notify('success', 'Workspace backup created.');
+      if (result) notify('success', t('backupCreated'));
     } catch (error: unknown) {
       logger.error('backup_export_failed', { message: errorMessage(error) });
-      notify('error', errorMessage(error));
+      notify('error', errorMessage(error, t('unexpectedError')));
     }
-  }, [notify, snapshot]);
+  }, [notify, snapshot, t]);
 
   const restoreBackup = useCallback(async () => {
     try {
       const raw = await openBackupFile();
       if (!raw) return;
       const restored = importBackupPayload(raw);
-      if (!window.confirm('Replace the current workspace with this backup?')) return;
+      if (!window.confirm(t('replaceWorkspaceConfirm'))) return;
       diskFingerprintsRef.current.clear();
       conflictWarningsRef.current.clear();
       unverifiedRecoveredPathsRef.current = new Set(
@@ -466,18 +461,15 @@ export function useWorkspace() {
         onboardingComplete: true,
       });
       saveOnboardingComplete(true);
-      notify('success', 'Workspace restored from backup.');
+      notify('success', t('workspaceRestored'));
     } catch (error: unknown) {
       logger.warn('backup_restore_failed', { message: errorMessage(error) });
-      notify('error', errorMessage(error));
+      notify('error', errorMessage(error, t('unexpectedError')));
     }
-  }, [notify]);
+  }, [notify, t]);
 
   const resetWorkspace = useCallback(() => {
-    if (
-      state.tabs.some(isDirty) &&
-      !window.confirm('Reset the workspace and discard all unsaved recovery content?')
-    ) {
+    if (state.tabs.some(isDirty) && !window.confirm(t('resetWorkspaceConfirm'))) {
       return;
     }
 
@@ -491,8 +483,8 @@ export function useWorkspace() {
       tabs: [tab],
       activeId: tab.id,
     }));
-    notify('success', 'Workspace recovery was reset.');
-  }, [notify, state.tabs]);
+    notify('success', t('workspaceReset'));
+  }, [notify, state.tabs, t]);
 
   const updateSettings = useCallback((patch: Partial<EditorSettings>) => {
     setState((current) => ({ ...current, settings: { ...current.settings, ...patch } }));
@@ -565,27 +557,41 @@ function addRecent(files: RecentFile[], path: string, name: string): RecentFile[
 
 function notifyDroppedFileResult(
   notify: (tone: ToastMessage['tone'], message: string) => void,
+  t: Translator,
   openedCount: number,
   failedCount: number,
   ignoredCount: number,
   lastError: string,
 ): void {
   if (openedCount > 0) {
-    notify('success', `Opened ${openedCount} dropped ${openedCount === 1 ? 'file' : 'files'}.`);
+    notify(
+      'success',
+      openedCount === 1
+        ? t('droppedOpenedOne', { count: openedCount })
+        : t('droppedOpenedMany', { count: openedCount }),
+    );
   }
   if (failedCount > 0) {
+    const detail = lastError ? ` ${lastError}` : '';
     notify(
       'warning',
-      `${failedCount} dropped ${failedCount === 1 ? 'file was' : 'files were'} skipped.${lastError ? ` ${lastError}` : ''}`,
+      failedCount === 1
+        ? t('droppedSkippedOne', { count: failedCount, detail })
+        : t('droppedSkippedMany', { count: failedCount, detail }),
     );
   }
   if (ignoredCount > 0) {
-    notify('warning', `${ignoredCount} additional dropped ${ignoredCount === 1 ? 'file was' : 'files were'} ignored.`);
+    notify(
+      'warning',
+      ignoredCount === 1
+        ? t('droppedIgnoredOne', { count: ignoredCount })
+        : t('droppedIgnoredMany', { count: ignoredCount }),
+    );
   }
 }
 
-function errorMessage(error: unknown): string {
+function errorMessage(error: unknown, fallback = 'An unexpected error occurred.'): string {
   if (error instanceof Error) return error.message;
   if (typeof error === 'string') return error;
-  return 'An unexpected error occurred.';
+  return fallback;
 }
