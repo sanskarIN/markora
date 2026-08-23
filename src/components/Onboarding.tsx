@@ -1,30 +1,30 @@
+import { useI18n } from '../i18n';
+
 interface OnboardingProps {
   open: boolean;
   onComplete: () => void;
 }
 
 export function Onboarding({ open, onComplete }: OnboardingProps) {
+  const { t } = useI18n();
   if (!open) return null;
 
   return (
     <div className="modal-backdrop onboarding-backdrop">
       <section className="onboarding-card" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
-        <img src="/markora-logo.svg" alt="Markora logo" width="76" height="76" />
-        <span className="eyebrow">Welcome to Markora</span>
-        <h1 id="onboarding-title">Write clearly. Keep it local.</h1>
-        <p>
-          Edit Markdown with a live sanitized preview, automatic recovery, multiple tabs, keyboard commands,
-          and native desktop files—without an account.
-        </p>
+        <img src="/markora-logo.svg" alt={t('markoraLogo')} width="76" height="76" />
+        <span className="eyebrow">{t('welcomeToMarkora')}</span>
+        <h1 id="onboarding-title">{t('onboardingTitle')}</h1>
+        <p>{t('onboardingBody')}</p>
         <div className="onboarding-grid">
-          <Feature title="Local-first" text="Your documents stay on your device unless you choose to move them." />
-          <Feature title="Safe preview" text="Raw HTML, unsafe URL schemes, and remote image loading are blocked by default." />
-          <Feature title="Fast workflow" text="Use Ctrl/Cmd + K for commands and Ctrl/Cmd + F for find and replace." />
+          <Feature title={t('localFirst')} text={t('localFirstBody')} />
+          <Feature title={t('safePreview')} text={t('safePreviewBody')} />
+          <Feature title={t('fastWorkflow')} text={t('fastWorkflowBody')} />
         </div>
         <button className="primary-button" type="button" onClick={onComplete}>
-          Start writing
+          {t('startWriting')}
         </button>
-        <small>Made by the Sanskar · MIT licensed</small>
+        <small>{t('madeByLicensed')}</small>
       </section>
     </div>
   );
