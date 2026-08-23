@@ -1,12 +1,19 @@
 import { useMemo, useState } from 'react';
 
-import { useI18n } from '../i18n';
+import { useI18n, type AppTranslationKey } from '../i18n';
 import { BUILT_IN_EXPORT_TEMPLATES, exportTemplatePatch } from '../lib/exportTemplates';
 import type { EditorSettings } from '../types';
 
 interface ExportTemplatePickerProps {
   onUpdate: (patch: Partial<EditorSettings>) => void;
 }
+
+const TEMPLATE_NAME_KEYS: Record<string, AppTranslationKey> = {
+  standard: 'standardDocument',
+  'compact-a4': 'compactA4',
+  'code-review': 'codeReview',
+  'letter-report': 'usLetterReport',
+};
 
 export function ExportTemplatePicker({ onUpdate }: ExportTemplatePickerProps) {
   const { t } = useI18n();
@@ -23,7 +30,7 @@ export function ExportTemplatePicker({ onUpdate }: ExportTemplatePickerProps) {
         <select value={selectedId} onChange={(event) => setSelectedId(event.target.value)}>
           {BUILT_IN_EXPORT_TEMPLATES.map((candidate) => (
             <option key={candidate.id} value={candidate.id}>
-              {candidate.name}
+              {TEMPLATE_NAME_KEYS[candidate.id] ? t(TEMPLATE_NAME_KEYS[candidate.id]) : candidate.name}
             </option>
           ))}
         </select>
