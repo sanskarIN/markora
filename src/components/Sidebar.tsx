@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 
+import { useI18n } from '../i18n';
 import { getDocumentStatistics } from '../lib/statistics';
 import type { HeadingItem, PanelMode, RecentFile } from '../types';
 import { OutlineNavigator } from './OutlineNavigator';
@@ -23,11 +24,12 @@ export function Sidebar({
   onHeadingSelect,
   onRecentOpen,
 }: SidebarProps) {
+  const { t } = useI18n();
   const statistics = useMemo(() => getDocumentStatistics(content), [content]);
 
   return (
-    <aside className="sidebar" aria-label="Document navigation">
-      <div className="sidebar-tabs" role="tablist" aria-label="Navigation views">
+    <aside className="sidebar" aria-label={t('documentNavigation')}>
+      <div className="sidebar-tabs" role="tablist" aria-label={t('navigationViews')}>
         <button
           className={panel === 'outline' ? 'is-active' : ''}
           type="button"
@@ -35,7 +37,7 @@ export function Sidebar({
           aria-selected={panel === 'outline'}
           onClick={() => onPanelChange('outline')}
         >
-          Outline
+          {t('outline')}
         </button>
         <button
           className={panel === 'recent' ? 'is-active' : ''}
@@ -44,7 +46,7 @@ export function Sidebar({
           aria-selected={panel === 'recent'}
           onClick={() => onPanelChange('recent')}
         >
-          Recent
+          {t('recent')}
         </button>
         <button
           className={panel === 'statistics' ? 'is-active' : ''}
@@ -53,7 +55,7 @@ export function Sidebar({
           aria-selected={panel === 'statistics'}
           onClick={() => onPanelChange('statistics')}
         >
-          Stats
+          {t('stats')}
         </button>
       </div>
 
@@ -77,22 +79,22 @@ export function Sidebar({
               ))}
             </div>
           ) : (
-            <EmptySidebarState title="No recent files" body="Files opened from disk will appear here." />
+            <EmptySidebarState title={t('noRecentFiles')} body={t('emptyRecent')} />
           )
         ) : (
-          <div className="statistics-grid" aria-label="Document statistics">
-            <Statistic label="Words" value={statistics.words} />
-            <Statistic label="Characters" value={statistics.characters} />
-            <Statistic label="Lines" value={statistics.lines} />
-            <Statistic label="Paragraphs" value={statistics.paragraphs} />
-            <Statistic label="Headings" value={statistics.headings} />
-            <Statistic label="Links" value={statistics.links} />
-            <Statistic label="List items" value={statistics.listItems} />
-            <Statistic label="Task items" value={statistics.taskItems} />
-            <Statistic label="Code blocks" value={statistics.codeBlocks} />
+          <div className="statistics-grid" aria-label={t('documentStatistics')}>
+            <Statistic label={t('words')} value={statistics.words} />
+            <Statistic label={t('characters')} value={statistics.characters} />
+            <Statistic label={t('lines')} value={statistics.lines} />
+            <Statistic label={t('paragraphs')} value={statistics.paragraphs} />
+            <Statistic label={t('headings')} value={statistics.headings} />
+            <Statistic label={t('links')} value={statistics.links} />
+            <Statistic label={t('listItems')} value={statistics.listItems} />
+            <Statistic label={t('taskItems')} value={statistics.taskItems} />
+            <Statistic label={t('codeBlocks')} value={statistics.codeBlocks} />
             <Statistic
-              label="Reading time"
-              value={statistics.readingMinutes ? `${statistics.readingMinutes} min` : '—'}
+              label={t('readingTime')}
+              value={statistics.readingMinutes ? t('minutesShort', { count: statistics.readingMinutes }) : '—'}
             />
           </div>
         )}
