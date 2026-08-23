@@ -26,13 +26,13 @@ export function PreviewPane({ markdown, fontFamily, onOpenLink }: PreviewPanePro
           {t('sanitized')}
         </span>
       </div>
-      <article className="markdown-preview" style={{ fontFamily: resolvedFontFamily }}>
+      <article className="markdown-preview" style={{ fontFamily: resolvedFontFamily }} dir="auto">
         <aside className="print-metadata" aria-hidden="true" style={{ display: 'none' }}>
           <strong>{printTitle}</strong>
           <span>{t('printedFromMarkora', { date: printDate })}</span>
         </aside>
         {markdown.trim() ? (
-          <MarkdownBody markdown={markdown} onOpenLink={onOpenLink} />
+          <MarkdownBody markdown={markdown} imageLabel={t('blockedImage')} onOpenLink={onOpenLink} />
         ) : (
           <div className="empty-state">
             <strong>{t('nothingToPreview')}</strong>
