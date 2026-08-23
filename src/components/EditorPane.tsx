@@ -1,7 +1,8 @@
 import { forwardRef } from 'react';
 
-import type { HeadingItem } from '../types';
+import { useI18n } from '../i18n';
 import { getCursorLine } from '../lib/document';
+import type { HeadingItem } from '../types';
 
 interface EditorPaneProps {
   title: string;
@@ -29,6 +30,7 @@ export const EditorPane = forwardRef<HTMLTextAreaElement, EditorPaneProps>(funct
   },
   ref,
 ) {
+  const { t } = useI18n();
   const updateCursor = (target: HTMLTextAreaElement) => {
     onCursorLineChange(getCursorLine(target.value, target.selectionStart));
   };
@@ -37,13 +39,13 @@ export const EditorPane = forwardRef<HTMLTextAreaElement, EditorPaneProps>(funct
     'var(--writing-font, ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace)';
 
   return (
-    <section className="editor-pane" aria-label="Markdown editor">
+    <section className="editor-pane" aria-label={t('markdownEditor')}>
       <div className="pane-header">
         <div className="pane-title">
-          <span className="pane-kicker">Editor</span>
+          <span className="pane-kicker">{t('editor')}</span>
           <strong>{title}</strong>
         </div>
-        <nav className="breadcrumbs" aria-label="Heading breadcrumbs">
+        <nav className="breadcrumbs" aria-label={t('headingBreadcrumbs')}>
           {breadcrumbs.length ? (
             breadcrumbs.map((heading, index) => (
               <span key={`${heading.line}-${heading.id}`}>
@@ -52,7 +54,7 @@ export const EditorPane = forwardRef<HTMLTextAreaElement, EditorPaneProps>(funct
               </span>
             ))
           ) : (
-            <span>Document root</span>
+            <span>{t('documentRoot')}</span>
           )}
         </nav>
       </div>
@@ -60,7 +62,7 @@ export const EditorPane = forwardRef<HTMLTextAreaElement, EditorPaneProps>(funct
       <textarea
         ref={ref}
         className="markdown-editor"
-        aria-label="Markdown source"
+        aria-label={t('markdownSource')}
         autoCapitalize="sentences"
         autoCorrect="on"
         spellCheck="true"
