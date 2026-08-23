@@ -64,6 +64,20 @@ test('primary toolbar remains keyboard reachable in DOM order', async ({ page })
   await expect(openButton).toBeFocused();
 });
 
+test('forced colors preserve an explicit keyboard focus indicator', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  const newButton = page.getByRole('button', { name: 'New', exact: true });
+  await newButton.focus();
+
+  const focusStyle = await newButton.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth };
+  });
+
+  expect(focusStyle.outlineStyle).not.toBe('none');
+  expect(focusStyle.outlineWidth).not.toBe('0px');
+});
+
 test('command and settings dialogs expose accessible names and close from Escape', async ({ page }) => {
   await page.keyboard.press(`${modifier}+k`);
   const commands = page.getByRole('dialog', { name: 'Command palette' });
