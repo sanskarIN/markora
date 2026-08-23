@@ -1,5 +1,6 @@
-import type { DocumentTab } from '../types';
+import { useI18n } from '../i18n';
 import { isDirty } from '../lib/document';
+import type { DocumentTab } from '../types';
 
 interface TabBarProps {
   tabs: DocumentTab[];
@@ -10,8 +11,10 @@ interface TabBarProps {
 }
 
 export function TabBar({ tabs, activeId, onActivate, onClose, onNew }: TabBarProps) {
+  const { t } = useI18n();
+
   return (
-    <div className="tab-bar" role="tablist" aria-label="Open documents">
+    <div className="tab-bar" role="tablist" aria-label={t('openDocuments')}>
       <div className="tab-strip">
         {tabs.map((tab) => {
           const active = tab.id === activeId;
@@ -26,12 +29,12 @@ export function TabBar({ tabs, activeId, onActivate, onClose, onNew }: TabBarPro
                 onClick={() => onActivate(tab.id)}
               >
                 <span className="tab-title">{tab.title}</span>
-                {isDirty(tab) ? <span className="dirty-dot" aria-label="Unsaved changes">●</span> : null}
+                {isDirty(tab) ? <span className="dirty-dot" aria-label={t('unsaved')}>●</span> : null}
               </button>
               <button
                 className="tab-close"
                 type="button"
-                aria-label={`Close ${tab.title}`}
+                aria-label={t('closeDocument', { title: tab.title })}
                 onClick={() => onClose(tab.id)}
               >
                 ×
@@ -40,7 +43,7 @@ export function TabBar({ tabs, activeId, onActivate, onClose, onNew }: TabBarPro
           );
         })}
       </div>
-      <button className="tab-new" type="button" onClick={onNew} aria-label="New document" title="New document">
+      <button className="tab-new" type="button" onClick={onNew} aria-label={t('newDocument')} title={t('newDocument')}>
         +
       </button>
     </div>
