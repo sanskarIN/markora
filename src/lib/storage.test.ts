@@ -55,6 +55,25 @@ describe('workspace storage', () => {
     expect(restarted?.tabs[0]?.path).toBe('/notes/Recovery.md');
   });
 
+  it('restores the previously active document in a multi-tab recovery snapshot', () => {
+    const first = createDocument('# First', 'First.md');
+    const second = createDocument('# Second', 'Second.md');
+    const snapshot: WorkspaceSnapshot = {
+      version: 1,
+      activeId: second.id,
+      tabs: [first, second],
+      recentFiles: [],
+      settings: DEFAULT_SETTINGS,
+      onboardingComplete: true,
+      savedAt: Date.now(),
+    };
+
+    expect(saveWorkspace(snapshot)).toEqual({ ok: true });
+    const restarted = loadWorkspace();
+    expect(restarted?.activeId).toBe(second.id);
+    expect(restarted?.tabs.map((tab) => tab.title)).toEqual(['First.md', 'Second.md']);
+  });
+
   it('migrates legacy settings without newer appearance and print preferences', () => {
     const tab = createDocument('# Legacy', 'Legacy.md');
     const snapshot: WorkspaceSnapshot = {
