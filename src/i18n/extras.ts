@@ -34,6 +34,8 @@ export const extraEn = {
   enterDistractionFree: 'Enter distraction-free mode',
   exitFocus: 'Exit focus',
   closeSettings: 'Close settings',
+  dropOpenFailed: 'Could not open the dropped files.',
+  dropInitFailed: 'Desktop file drop could not be initialized.',
 } as const;
 
 export type ExtraTranslationKey = keyof typeof extraEn;
@@ -74,4 +76,6 @@ export const extraHi: Record<ExtraTranslationKey, string> = {
   enterDistractionFree: 'विकर्षण-मुक्त मोड में जाएँ',
   exitFocus: 'फ़ोकस से बाहर निकलें',
   closeSettings: 'सेटिंग्स बंद करें',
+  dropOpenFailed: 'छोड़ी गई फ़ाइलें नहीं खोली जा सकीं।',
+  dropInitFailed: 'डेस्कटॉप फ़ाइल ड्रॉप शुरू नहीं किया जा सका।',
 };
