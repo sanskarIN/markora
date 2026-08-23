@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { createDocument } from './document';
+import { createDocument, isDirty } from './document';
 import {
   exportBackupPayload,
   importBackupPayload,
@@ -26,6 +26,33 @@ describe('workspace storage', () => {
 
     expect(saveWorkspace(snapshot)).toEqual({ ok: true });
     expect(loadWorkspace()?.tabs[0]?.content).toBe('# Test');
+  });
+
+  it('preserves unsaved editor content after a simulated abrupt restart', () => {
+    const tab = createDocument('# Saved version', 'Recovery.md', '/notes/Recovery.md');
+    const dirtyTab = {
+      ...tab,
+      content: '# Unsaved version\n\nRecovered after restart.',
+      updatedAt: tab.updatedAt + 1,
+    };
+    const snapshot: WorkspaceSnapshot = {
+      version: 1,
+      activeId: dirtyTab.id,
+      tabs: [dirtyTab],
+      recentFiles: [],
+      settings: DEFAULT_SETTINGS,
+      onboardingComplete: true,
+      savedAt: Date.now(),
+    };
+
+    expect(isDirty(dirtyTab)).toBe(true);
+    expect(saveWorkspace(snapshot)).toEqual({ ok: true });
+
+    const restarted = loadWorkspace();
+    expect(restarted?.tabs[0]?.content).toBe('# Unsaved version\n\nRecovered after restart.');
+    expect(restarted?.tabs[0]?.savedContent).toBe('# Saved version');
+    expect(restarted?.tabs[0] ? isDirty(restarted.tabs[0]) : false).toBe(true);
+    expect(restarted?.tabs[0]?.path).toBe('/notes/Recovery.md');
   });
 
   it('migrates legacy settings without newer appearance and print preferences', () => {
