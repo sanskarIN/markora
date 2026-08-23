@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useI18n, type AppTranslationKey, type TranslationValues } from '../i18n';
+import { localizeUserError } from '../i18n/userErrors';
 import { createDocument, createId, deriveFileName, isDirty, WELCOME_MARKDOWN } from '../lib/document';
 import { limitDroppedItems, readDroppedBrowserFile } from '../lib/fileDrop';
 import { logger } from '../lib/logging';
@@ -265,7 +266,7 @@ export function useWorkspace() {
       notify('success', t('fileOpened'));
     } catch (error: unknown) {
       logger.error('open_file_failed', { message: errorMessage(error) });
-      notify('error', errorMessage(error, t('unexpectedError')));
+      notify('error', localizeUserError(error, t));
     }
   }, [notify, rememberFingerprint, t]);
 
@@ -304,8 +305,8 @@ export function useWorkspace() {
           openedCount += 1;
         } catch (error: unknown) {
           failedCount += 1;
-          lastError = errorMessage(error);
-          logger.warn('drop_open_failed', { message: lastError });
+          lastError = localizeUserError(error, t);
+          logger.warn('drop_open_failed', { message: errorMessage(error) });
         }
       }
 
@@ -328,8 +329,8 @@ export function useWorkspace() {
           openedCount += 1;
         } catch (error: unknown) {
           failedCount += 1;
-          lastError = errorMessage(error);
-          logger.warn('browser_drop_open_failed', { message: lastError });
+          lastError = localizeUserError(error, t);
+          logger.warn('browser_drop_open_failed', { message: errorMessage(error) });
         }
       }
 
@@ -374,7 +375,7 @@ export function useWorkspace() {
         notify('success', t('fileSaved'));
       } catch (error: unknown) {
         logger.error('save_file_failed', { message: errorMessage(error) });
-        notify('error', errorMessage(error, t('unexpectedError')));
+        notify('error', localizeUserError(error, t));
       }
     },
     [hasExternalChange, notify, rememberFingerprint, state.activeId, state.tabs, t],
@@ -416,7 +417,7 @@ export function useWorkspace() {
       notify('success', t('reloadedDisk'));
     } catch (error: unknown) {
       logger.warn('reload_file_failed', { message: errorMessage(error) });
-      notify('error', errorMessage(error, t('unexpectedError')));
+      notify('error', localizeUserError(error, t));
     }
   }, [notify, rememberFingerprint, state.activeId, state.tabs, t]);
 
@@ -431,7 +432,7 @@ export function useWorkspace() {
       if (result) notify('success', t('htmlExportCreated'));
     } catch (error: unknown) {
       logger.error('html_export_failed', { message: errorMessage(error) });
-      notify('error', errorMessage(error, t('unexpectedError')));
+      notify('error', localizeUserError(error, t));
     }
   }, [activeTab, locale, notify, t]);
 
@@ -441,7 +442,7 @@ export function useWorkspace() {
       if (result) notify('success', t('backupCreated'));
     } catch (error: unknown) {
       logger.error('backup_export_failed', { message: errorMessage(error) });
-      notify('error', errorMessage(error, t('unexpectedError')));
+      notify('error', localizeUserError(error, t));
     }
   }, [notify, snapshot, t]);
 
@@ -467,7 +468,7 @@ export function useWorkspace() {
       notify('success', t('workspaceRestored'));
     } catch (error: unknown) {
       logger.warn('backup_restore_failed', { message: errorMessage(error) });
-      notify('error', errorMessage(error, t('unexpectedError')));
+      notify('error', localizeUserError(error, t));
     }
   }, [notify, t]);
 
@@ -593,8 +594,8 @@ function notifyDroppedFileResult(
   }
 }
 
-function errorMessage(error: unknown, fallback = 'An unexpected error occurred.'): string {
+function errorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   if (typeof error === 'string') return error;
-  return fallback;
+  return 'An unexpected error occurred.';
 }
