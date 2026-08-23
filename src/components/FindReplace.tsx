@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import { useI18n } from '../i18n';
+import { getFindErrorTranslation } from '../i18n/findErrors';
 import { findMatches, getFindQueryError, replaceAllMatches, replaceMatch } from '../lib/document';
 import { clearFindHistory, loadFindHistory, recordFindQuery } from '../lib/findHistory';
 
@@ -18,6 +20,7 @@ export function FindReplace({
   onContentChange,
   onSelectRange,
 }: FindReplaceProps) {
+  const { t } = useI18n();
   const [query, setQuery] = useState('');
   const [replacement, setReplacement] = useState('');
   const [matchCase, setMatchCase] = useState(false);
@@ -34,6 +37,13 @@ export function FindReplace({
     () => getFindQueryError(query, options, content.length),
     [content.length, options, query],
   );
+  const queryErrorTranslation = useMemo(
+    () => getFindErrorTranslation(queryError),
+    [queryError],
+  );
+  const localizedQueryError = queryErrorTranslation
+    ? t(queryErrorTranslation.key, queryErrorTranslation.values)
+    : null;
   const matches = useMemo(
     () => findMatches(content, query, options),
     [content, options, query],
@@ -80,16 +90,16 @@ export function FindReplace({
   const resetActiveMatch = () => setActiveIndex(0);
 
   return (
-    <section className="find-replace" aria-label="Find and replace">
+    <section className="find-replace" aria-label={t('findReplace')}>
       <div className="find-row">
         <label>
-          <span className="sr-only">Find</span>
+          <span className="sr-only">{t('find')}</span>
           <input
             autoFocus
             type="search"
             list="markora-find-history"
             value={query}
-            placeholder={useRegex ? 'Find with regular expression' : 'Find'}
+            placeholder={useRegex ? t('findRegex') : t('find')}
             aria-invalid={queryError ? 'true' : undefined}
             aria-describedby={queryError ? 'find-query-error' : undefined}
             onChange={(event) => {
@@ -111,33 +121,33 @@ export function FindReplace({
           </datalist>
         </label>
         <span className="match-count" role="status">
-          {queryError ? 'Invalid query' : matches.length ? `${activeIndex + 1} / ${matches.length}` : 'No matches'}
+          {queryError ? t('invalidQuery') : matches.length ? `${activeIndex + 1} / ${matches.length}` : t('noMatches')}
         </span>
-        <button type="button" onClick={() => move(-1)} disabled={!matches.length} aria-label="Previous match">
+        <button type="button" onClick={() => move(-1)} disabled={!matches.length} aria-label={t('previousMatch')}>
           ↑
         </button>
-        <button type="button" onClick={() => move(1)} disabled={!matches.length} aria-label="Next match">
+        <button type="button" onClick={() => move(1)} disabled={!matches.length} aria-label={t('nextMatch')}>
           ↓
         </button>
-        <button type="button" onClick={onClose} aria-label="Close find and replace">
+        <button type="button" onClick={onClose} aria-label={t('closeFindReplace')}>
           ×
         </button>
       </div>
       <div className="find-row">
         <label>
-          <span className="sr-only">Replace with</span>
+          <span className="sr-only">{t('replaceWith')}</span>
           <input
             type="text"
             value={replacement}
-            placeholder="Replace with"
+            placeholder={t('replaceWith')}
             onChange={(event) => setReplacement(event.target.value)}
           />
         </label>
         <button type="button" onClick={replaceCurrent} disabled={!matches.length}>
-          Replace
+          {t('replace')}
         </button>
         <button type="button" onClick={replaceAll} disabled={!matches.length}>
-          Replace all
+          {t('replaceAll')}
         </button>
         <label className="inline-check">
           <input
@@ -148,7 +158,7 @@ export function FindReplace({
               resetActiveMatch();
             }}
           />
-          Match case
+          {t('matchCase')}
         </label>
         <label className="inline-check">
           <input
@@ -159,7 +169,7 @@ export function FindReplace({
               resetActiveMatch();
             }}
           />
-          Whole word
+          {t('wholeWord')}
         </label>
         <label className="inline-check">
           <input
@@ -170,7 +180,7 @@ export function FindReplace({
               resetActiveMatch();
             }}
           />
-          Regex
+          {t('regex')}
         </label>
         {history.length ? (
           <button
@@ -181,13 +191,13 @@ export function FindReplace({
               setHistory([]);
             }}
           >
-            Clear history
+            {t('clearHistory')}
           </button>
         ) : null}
       </div>
-      {queryError ? (
+      {localizedQueryError ? (
         <p id="find-query-error" className="find-query-error" role="alert">
-          {queryError}
+          {localizedQueryError}
         </p>
       ) : null}
     </section>
