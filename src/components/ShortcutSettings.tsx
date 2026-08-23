@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { useI18n } from '../i18n';
+import type { TranslationKey } from '../i18n/en';
 import {
   bindingFromKeyboardEvent,
   formatShortcutList,
@@ -11,7 +13,20 @@ import {
   type ShortcutPreferencesV1,
 } from '../lib/shortcuts';
 
+const ACTION_LABEL_KEYS: Record<ShortcutActionId, TranslationKey> = {
+  new: 'newDocument',
+  open: 'openMarkdownFile',
+  save: 'saveDocument',
+  saveAs: 'saveDocumentAs',
+  find: 'findReplace',
+  palette: 'commandPalette',
+  settings: 'settings',
+  bold: 'bold',
+  italic: 'italic',
+};
+
 export function ShortcutSettings() {
+  const { t } = useI18n();
   const [preferences, setPreferences] = useState<ShortcutPreferencesV1>(() => loadShortcutPreferences());
   const [editing, setEditing] = useState<ShortcutActionId | null>(null);
   const [error, setError] = useState('');
@@ -29,7 +44,7 @@ export function ShortcutSettings() {
 
     const binding = bindingFromKeyboardEvent(event.nativeEvent);
     if (!binding) {
-      setError('Press Ctrl/Command plus a non-modifier key. Shift and Alt are optional.');
+      setError(t('shortcutNeedsModifier'));
       return;
     }
 
@@ -39,18 +54,29 @@ export function ShortcutSettings() {
       setEditing(null);
       setError('');
     } catch (saveError: unknown) {
-      setError(saveError instanceof Error ? saveError.message : 'Could not save that shortcut.');
+      const message = saveError instanceof Error ? saveError.message : '';
+      if (message === 'Use Ctrl/Command plus a non-modifier key.') {
+        setError(t('shortcutNeedsModifier'));
+        return;
+      }
+
+      const conflict = SHORTCUT_ACTIONS.find(
+        (action) => message === `That shortcut is already assigned to ${action.label}.`,
+      );
+      setError(
+        conflict
+          ? t('shortcutInUse', { action: t(ACTION_LABEL_KEYS[conflict.id]) })
+          : t('shortcutSaveFailed'),
+      );
     }
   };
 
   return (
-    <div className="settings-fields" aria-label="Keyboard shortcut configuration">
-      <p className="settings-note">
-        Select a shortcut button, then press Ctrl/Command plus a key. Shift and Alt are optional. Duplicate bindings are rejected.
-      </p>
+    <div className="settings-fields" aria-label={t('keyboardShortcuts')}>
+      <p className="settings-note">{t('shortcutInstructions')}</p>
       {SHORTCUT_ACTIONS.map((action) => (
         <div className="setting-row" key={action.id}>
-          <span>{action.label}</span>
+          <span>{t(ACTION_LABEL_KEYS[action.id])}</span>
           <button
             type="button"
             aria-pressed={editing === action.id}
@@ -60,7 +86,7 @@ export function ShortcutSettings() {
             }}
             onKeyDown={(event) => capture(action.id, event)}
           >
-            {editing === action.id ? 'Press shortcut…' : formatShortcutList(preferences, action.id)}
+            {editing === action.id ? t('pressShortcut') : formatShortcutList(preferences, action.id)}
           </button>
         </div>
       ))}
@@ -73,7 +99,7 @@ export function ShortcutSettings() {
             setError('');
           }}
         >
-          Reset keyboard shortcuts
+          {t('resetKeyboardShortcuts')}
         </button>
       </div>
       {error ? <p className="settings-note" role="alert">{error}</p> : null}
