@@ -66,6 +66,7 @@ export const EditorPane = forwardRef<HTMLTextAreaElement, EditorPaneProps>(funct
         autoCapitalize="sentences"
         autoCorrect="on"
         spellCheck="true"
+        dir="auto"
         value={content}
         wrap={wordWrap ? 'soft' : 'off'}
         style={{ fontFamily: resolvedFontFamily, fontSize: `${fontSize}px`, lineHeight }}
