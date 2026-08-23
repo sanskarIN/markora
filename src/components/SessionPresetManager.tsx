@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { useI18n } from '../i18n';
 import type { LayoutMode } from '../lib/layout';
 import {
   deleteSessionPreset,
@@ -26,6 +27,7 @@ export function SessionPresetManager({
   onLayoutModeChange,
   onEditorPanePercentChange,
 }: SessionPresetManagerProps) {
+  const { t } = useI18n();
   const [name, setName] = useState('');
   const [presets, setPresets] = useState<SessionPresetV1[]>([]);
   const [selectedId, setSelectedId] = useState('');
@@ -51,7 +53,8 @@ export function SessionPresetManager({
       setName('');
       setError('');
     } catch (saveError: unknown) {
-      setError(saveError instanceof Error ? saveError.message : 'Could not save the session preset.');
+      const message = saveError instanceof Error ? saveError.message : '';
+      setError(message === 'Preset name is required.' ? t('presetNameRequired') : t('presetSaveFailed'));
     }
   };
 
@@ -72,14 +75,14 @@ export function SessionPresetManager({
   };
 
   return (
-    <div className="settings-fields" aria-label="Session presets">
+    <div className="settings-fields" aria-label={t('workspacePresets')}>
       <label className="setting-row">
-        <span>Preset name</span>
+        <span>{t('presetName')}</span>
         <input
           type="text"
           value={name}
           maxLength={48}
-          placeholder="e.g. Focus writing"
+          placeholder={t('presetNamePlaceholder')}
           onChange={(event) => setName(event.target.value)}
           style={{
             width: '100%',
@@ -94,18 +97,18 @@ export function SessionPresetManager({
       </label>
       <div className="button-row">
         <button type="button" disabled={!name.trim()} onClick={handleSave}>
-          Save current session preset
+          {t('saveCurrentPreset')}
         </button>
       </div>
 
       <label className="setting-row">
-        <span>Saved preset</span>
+        <span>{t('savedPreset')}</span>
         <select
           value={selectedId}
           disabled={presets.length === 0}
           onChange={(event) => setSelectedId(event.target.value)}
         >
-          {presets.length === 0 ? <option value="">No saved presets</option> : null}
+          {presets.length === 0 ? <option value="">{t('noSavedPresets')}</option> : null}
           {presets.map((preset) => (
             <option key={preset.id} value={preset.id}>
               {preset.name}
@@ -115,16 +118,14 @@ export function SessionPresetManager({
       </label>
       <div className="button-row">
         <button type="button" disabled={!selected} onClick={handleApply}>
-          Apply preset
+          {t('applyPreset')}
         </button>
         <button type="button" disabled={!selected} onClick={handleDelete}>
-          Delete preset
+          {t('deletePreset')}
         </button>
       </div>
       {error ? <p className="settings-note" role="alert">{error}</p> : null}
-      <p className="settings-note">
-        Presets stay on this device and contain preferences/layout only. Document contents are never stored in a preset.
-      </p>
+      <p className="settings-note">{t('presetPrivacyNote')}</p>
     </div>
   );
 }
