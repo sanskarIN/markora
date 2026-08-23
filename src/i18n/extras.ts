@@ -37,6 +37,15 @@ export const extraEn = {
   dropOpenFailed: 'Could not open the dropped files.',
   dropInitFailed: 'Desktop file drop could not be initialized.',
   blockedImage: 'Blocked image',
+
+  droppedTooLarge: 'The dropped file exceeds Markora’s 16 MB safety limit.',
+  droppedUnsupported: 'Only Markdown and plain-text files can be dropped into Markora.',
+  droppedInvalidUtf8: 'The dropped file is not valid UTF-8 text.',
+  invalidBackupFile: 'This is not a valid Markora backup file.',
+  unsupportedWorkspace: 'This backup uses an unsupported workspace version.',
+  invalidBackupTabs: 'The backup contains invalid document data.',
+  invalidBackupTabCount: 'The backup contains an invalid number of documents.',
+  invalidBackupActiveTab: 'The backup has an invalid active document.',
 } as const;
 
 export type ExtraTranslationKey = keyof typeof extraEn;
@@ -80,4 +89,13 @@ export const extraHi: Record<ExtraTranslationKey, string> = {
   dropOpenFailed: 'छोड़ी गई फ़ाइलें नहीं खोली जा सकीं।',
   dropInitFailed: 'डेस्कटॉप फ़ाइल ड्रॉप शुरू नहीं किया जा सका।',
   blockedImage: 'अवरुद्ध छवि',
+
+  droppedTooLarge: 'छोड़ी गई फ़ाइल Markora की 16 MB सुरक्षा सीमा से बड़ी है।',
+  droppedUnsupported: 'Markora में केवल Markdown और सादा-पाठ फ़ाइलें छोड़ी जा सकती हैं।',
+  droppedInvalidUtf8: 'छोड़ी गई फ़ाइल मान्य UTF-8 पाठ नहीं है।',
+  invalidBackupFile: 'यह मान्य Markora बैकअप फ़ाइल नहीं है।',
+  unsupportedWorkspace: 'यह बैकअप असमर्थित वर्कस्पेस संस्करण का उपयोग करता है।',
+  invalidBackupTabs: 'बैकअप में अमान्य दस्तावेज़ डेटा है।',
+  invalidBackupTabCount: 'बैकअप में दस्तावेज़ों की संख्या अमान्य है।',
+  invalidBackupActiveTab: 'बैकअप का सक्रिय दस्तावेज़ अमान्य है।',
 };
