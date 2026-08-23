@@ -1,5 +1,6 @@
 import {
   createContext,
+  createElement,
   useContext,
   useEffect,
   useMemo,
@@ -73,7 +74,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     [locale],
   );
 
-  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+  return createElement(I18nContext.Provider, { value }, children);
 }
 
 export function useI18n(): I18nContextValue {
