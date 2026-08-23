@@ -4,8 +4,12 @@ import { expect, test } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
-    localStorage.setItem('markora.onboarding.v1', 'complete');
-    localStorage.setItem('markora.locale.v1', 'en');
+    if (!localStorage.getItem('markora.onboarding.v1')) {
+      localStorage.setItem('markora.onboarding.v1', 'complete');
+    }
+    if (!localStorage.getItem('markora.locale.v1')) {
+      localStorage.setItem('markora.locale.v1', 'en');
+    }
   });
   await page.goto('/');
 });
