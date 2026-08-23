@@ -15,6 +15,7 @@ import { useFileDrop } from './hooks/useFileDrop';
 import { useLayoutPreferences } from './hooks/useLayoutPreferences';
 import { useShortcutPreferences } from './hooks/useShortcutPreferences';
 import { useWorkspace } from './hooks/useWorkspace';
+import { useI18n } from './i18n';
 import { getBreadcrumb, getCursorLine, getHeadings, isDirty } from './lib/document';
 import { applyMarkdownCommand, type MarkdownCommand } from './lib/editorCommands';
 import { openExternalUrl } from './lib/platform';
@@ -22,6 +23,7 @@ import { eventMatchesShortcut, formatShortcutList } from './lib/shortcuts';
 import type { CommandAction, HeadingItem, PanelMode } from './types';
 
 export default function App() {
+  const { t } = useI18n();
   const workspace = useWorkspace();
   const {
     state,
@@ -116,8 +118,8 @@ export default function App() {
   useEffect(() => {
     if (!recoveredWorkspace || recoveryNoticeShown.current) return;
     recoveryNoticeShown.current = true;
-    notify('info', 'Recovered your previous workspace.');
-  }, [notify, recoveredWorkspace]);
+    notify('info', t('recoveredWorkspace'));
+  }, [notify, recoveredWorkspace, t]);
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)');
@@ -190,7 +192,7 @@ export default function App() {
 
   const handleOpenLink = async (url: string) => {
     const opened = await openExternalUrl(url);
-    if (!opened) notify('warning', 'That link was blocked for safety.');
+    if (!opened) notify('warning', t('blockedLink'));
   };
 
   const handleHeadingSelect = (heading: HeadingItem) => {
@@ -225,30 +227,30 @@ export default function App() {
 
   const commands = useMemo<CommandAction[]>(
     () => [
-      { id: 'new', label: 'New document', shortcut: formatShortcutList(shortcuts, 'new'), keywords: ['file', 'tab'], run: newTab },
-      { id: 'open', label: 'Open Markdown file', shortcut: formatShortcutList(shortcuts, 'open'), keywords: ['file', 'disk'], run: () => void openFile() },
-      { id: 'save', label: 'Save document', shortcut: formatShortcutList(shortcuts, 'save'), keywords: ['file', 'disk'], run: () => void saveActive(false) },
-      { id: 'save-as', label: 'Save document as…', shortcut: formatShortcutList(shortcuts, 'saveAs'), keywords: ['file', 'copy'], run: () => void saveActive(true) },
-      { id: 'reload-disk', label: 'Reload active file from disk', shortcut: null, keywords: ['file', 'reload', 'conflict'], run: () => void reloadActiveFromDisk() },
-      { id: 'find', label: 'Find and replace', shortcut: formatShortcutList(shortcuts, 'find'), keywords: ['search', 'replace'], run: () => setFindOpen(true) },
-      { id: 'format-bold', label: 'Format selection as bold', shortcut: formatShortcutList(shortcuts, 'bold'), keywords: ['format', 'strong'], run: () => applyEditorCommand('bold') },
-      { id: 'format-italic', label: 'Format selection as italic', shortcut: formatShortcutList(shortcuts, 'italic'), keywords: ['format', 'emphasis'], run: () => applyEditorCommand('italic') },
-      { id: 'format-inline-code', label: 'Format selection as inline code', shortcut: null, keywords: ['format', 'code'], run: () => applyEditorCommand('inline-code') },
-      { id: 'format-heading', label: 'Toggle level 2 heading', shortcut: null, keywords: ['format', 'heading'], run: () => applyEditorCommand('heading') },
-      { id: 'format-quote', label: 'Toggle block quote', shortcut: null, keywords: ['format', 'quote'], run: () => applyEditorCommand('quote') },
-      { id: 'format-bullets', label: 'Toggle bullet list', shortcut: null, keywords: ['format', 'list'], run: () => applyEditorCommand('bullet-list') },
-      { id: 'format-numbered', label: 'Toggle numbered list', shortcut: null, keywords: ['format', 'list'], run: () => applyEditorCommand('ordered-list') },
-      { id: 'format-task', label: 'Toggle task list', shortcut: null, keywords: ['format', 'todo', 'checkbox'], run: () => applyEditorCommand('task-list') },
-      { id: 'format-code-block', label: 'Toggle fenced code block', shortcut: null, keywords: ['format', 'code', 'fence'], run: () => applyEditorCommand('code-block') },
-      { id: 'format-link', label: 'Insert Markdown link', shortcut: null, keywords: ['format', 'link', 'url'], run: () => applyEditorCommand('link') },
-      { id: 'layout-split', label: 'Use split editor and preview layout', shortcut: null, keywords: ['layout', 'preview'], run: () => setMode('split') },
-      { id: 'layout-editor', label: 'Use editor-only layout', shortcut: null, keywords: ['layout', 'focus'], run: () => setMode('editor') },
-      { id: 'layout-preview', label: 'Use preview-only layout', shortcut: null, keywords: ['layout', 'reader'], run: () => setMode('preview') },
-      { id: 'html', label: 'Export HTML', shortcut: null, keywords: ['export', 'web'], run: () => void exportHtml() },
-      { id: 'pdf', label: 'Print / export PDF', shortcut: null, keywords: ['export', 'print'], run: exportPdf },
-      { id: 'settings', label: 'Open settings', shortcut: formatShortcutList(shortcuts, 'settings'), keywords: ['preferences', 'theme', 'shortcut', 'keybinding'], run: () => setSettingsOpen(true) },
-      { id: 'shortcut-help', label: 'Configure keyboard shortcuts', shortcut: formatShortcutList(shortcuts, 'settings'), keywords: ['keyboard', 'shortcut', 'keybinding', 'hotkey', 'preferences'], run: () => setSettingsOpen(true) },
-      { id: 'focus', label: distractionFree ? 'Exit distraction-free mode' : 'Enter distraction-free mode', shortcut: null, keywords: ['focus', 'writing'], run: () => setDistractionFree((value) => !value) },
+      { id: 'new', label: t('newDocument'), shortcut: formatShortcutList(shortcuts, 'new'), keywords: ['file', 'tab'], run: newTab },
+      { id: 'open', label: t('openMarkdownFile'), shortcut: formatShortcutList(shortcuts, 'open'), keywords: ['file', 'disk'], run: () => void openFile() },
+      { id: 'save', label: t('saveDocument'), shortcut: formatShortcutList(shortcuts, 'save'), keywords: ['file', 'disk'], run: () => void saveActive(false) },
+      { id: 'save-as', label: t('saveDocumentAs'), shortcut: formatShortcutList(shortcuts, 'saveAs'), keywords: ['file', 'copy'], run: () => void saveActive(true) },
+      { id: 'reload-disk', label: t('reloadDisk'), shortcut: null, keywords: ['file', 'reload', 'conflict'], run: () => void reloadActiveFromDisk() },
+      { id: 'find', label: t('findReplace'), shortcut: formatShortcutList(shortcuts, 'find'), keywords: ['search', 'replace'], run: () => setFindOpen(true) },
+      { id: 'format-bold', label: t('formatBold'), shortcut: formatShortcutList(shortcuts, 'bold'), keywords: ['format', 'strong'], run: () => applyEditorCommand('bold') },
+      { id: 'format-italic', label: t('formatItalic'), shortcut: formatShortcutList(shortcuts, 'italic'), keywords: ['format', 'emphasis'], run: () => applyEditorCommand('italic') },
+      { id: 'format-inline-code', label: t('formatInlineCode'), shortcut: null, keywords: ['format', 'code'], run: () => applyEditorCommand('inline-code') },
+      { id: 'format-heading', label: t('toggleLevel2Heading'), shortcut: null, keywords: ['format', 'heading'], run: () => applyEditorCommand('heading') },
+      { id: 'format-quote', label: t('toggleBlockQuote'), shortcut: null, keywords: ['format', 'quote'], run: () => applyEditorCommand('quote') },
+      { id: 'format-bullets', label: t('toggleBulletList'), shortcut: null, keywords: ['format', 'list'], run: () => applyEditorCommand('bullet-list') },
+      { id: 'format-numbered', label: t('toggleNumberedList'), shortcut: null, keywords: ['format', 'list'], run: () => applyEditorCommand('ordered-list') },
+      { id: 'format-task', label: t('toggleTaskList'), shortcut: null, keywords: ['format', 'todo', 'checkbox'], run: () => applyEditorCommand('task-list') },
+      { id: 'format-code-block', label: t('toggleFencedCodeBlock'), shortcut: null, keywords: ['format', 'code', 'fence'], run: () => applyEditorCommand('code-block') },
+      { id: 'format-link', label: t('insertMarkdownLink'), shortcut: null, keywords: ['format', 'link', 'url'], run: () => applyEditorCommand('link') },
+      { id: 'layout-split', label: t('useSplitLayout'), shortcut: null, keywords: ['layout', 'preview'], run: () => setMode('split') },
+      { id: 'layout-editor', label: t('useEditorLayout'), shortcut: null, keywords: ['layout', 'focus'], run: () => setMode('editor') },
+      { id: 'layout-preview', label: t('usePreviewLayout'), shortcut: null, keywords: ['layout', 'reader'], run: () => setMode('preview') },
+      { id: 'html', label: t('exportHtml'), shortcut: null, keywords: ['export', 'web'], run: () => void exportHtml() },
+      { id: 'pdf', label: t('printExportPdf'), shortcut: null, keywords: ['export', 'print'], run: exportPdf },
+      { id: 'settings', label: t('openSettings'), shortcut: formatShortcutList(shortcuts, 'settings'), keywords: ['preferences', 'theme', 'shortcut', 'keybinding'], run: () => setSettingsOpen(true) },
+      { id: 'shortcut-help', label: t('configureKeyboardShortcuts'), shortcut: formatShortcutList(shortcuts, 'settings'), keywords: ['keyboard', 'shortcut', 'keybinding', 'hotkey', 'preferences'], run: () => setSettingsOpen(true) },
+      { id: 'focus', label: distractionFree ? t('exitDistractionFree') : t('enterDistractionFree'), shortcut: null, keywords: ['focus', 'writing'], run: () => setDistractionFree((value) => !value) },
     ],
     [
       applyEditorCommand,
@@ -260,6 +262,7 @@ export default function App() {
       saveActive,
       setMode,
       shortcuts,
+      t,
     ],
   );
 
@@ -307,9 +310,9 @@ export default function App() {
           className="focus-exit"
           type="button"
           onClick={() => setDistractionFree(false)}
-          title="Exit distraction-free mode"
+          title={t('exitDistractionFree')}
         >
-          Exit focus
+          {t('exitFocus')}
         </button>
       )}
 
