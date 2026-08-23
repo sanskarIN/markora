@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { useI18n } from '../i18n';
 import { filterOutline, getOutlineWindow, OUTLINE_ROW_HEIGHT } from '../lib/outline';
 import type { HeadingItem } from '../types';
 
@@ -9,6 +10,7 @@ interface OutlineNavigatorProps {
 }
 
 export function OutlineNavigator({ headings, onHeadingSelect }: OutlineNavigatorProps) {
+  const { t } = useI18n();
   const [query, setQuery] = useState('');
   const [scrollTop, setScrollTop] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(480);
@@ -43,13 +45,13 @@ export function OutlineNavigator({ headings, onHeadingSelect }: OutlineNavigator
   return (
     <div className="outline-navigator">
       <label className="outline-search">
-        <span className="sr-only">Filter outline</span>
+        <span className="sr-only">{t('filterOutline')}</span>
         <input
           type="search"
           value={query}
           maxLength={120}
-          placeholder="Filter headings…"
-          aria-label="Filter outline"
+          placeholder={t('filterHeadings')}
+          aria-label={t('filterOutline')}
           onChange={(event) => setQuery(event.target.value)}
         />
         <span aria-live="polite">
@@ -61,7 +63,7 @@ export function OutlineNavigator({ headings, onHeadingSelect }: OutlineNavigator
         <div
           ref={listRef}
           className="outline-virtual-list"
-          aria-label="Document outline headings"
+          aria-label={t('documentOutlineHeadings')}
           onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
         >
           {window.beforeHeight ? <div aria-hidden="true" style={{ height: window.beforeHeight }} /> : null}
@@ -74,7 +76,7 @@ export function OutlineNavigator({ headings, onHeadingSelect }: OutlineNavigator
                 height: OUTLINE_ROW_HEIGHT,
                 paddingInlineStart: `${12 + (heading.level - 1) * 12}px`,
               }}
-              title={`Line ${heading.line}`}
+              title={t('lineNumber', { line: heading.line })}
               onClick={() => onHeadingSelect(heading)}
             >
               <span className="outline-level" aria-hidden="true">H{heading.level}</span>
@@ -85,8 +87,8 @@ export function OutlineNavigator({ headings, onHeadingSelect }: OutlineNavigator
         </div>
       ) : (
         <div className="empty-state compact" role="status">
-          <strong>{headings.length ? 'No matching headings' : 'No headings yet'}</strong>
-          <p>{headings.length ? 'Try a different outline filter.' : 'Add Markdown headings to build an outline.'}</p>
+          <strong>{headings.length ? t('noMatchingHeadings') : t('noHeadingsYet')}</strong>
+          <p>{headings.length ? t('tryDifferentOutlineFilter') : t('emptyOutline')}</p>
         </div>
       )}
     </div>
