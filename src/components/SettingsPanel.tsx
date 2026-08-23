@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 
+import { useI18n, type AppTranslationKey } from '../i18n';
 import { getLocalFontStack, LOCAL_FONT_PRESETS } from '../lib/fonts';
 import type { LayoutMode } from '../lib/layout';
 import { getAppVersion } from '../lib/platform';
 import { buildPrintStyle } from '../lib/print';
 import type { DocumentTab, EditorSettings } from '../types';
 import { ExportTemplatePicker } from './ExportTemplatePicker';
+import { LanguageSettings } from './LanguageSettings';
 import { RecoveryInspector } from './RecoveryInspector';
 import { SessionPresetManager } from './SessionPresetManager';
 import { ShortcutSettings } from './ShortcutSettings';
@@ -31,6 +33,17 @@ interface SettingsPanelProps {
   onClose: () => void;
 }
 
+const FONT_COPY: Record<
+  EditorSettings['fontPreset'],
+  { label: AppTranslationKey; description: AppTranslationKey }
+> = {
+  'system-sans': { label: 'systemSans', description: 'systemSansDescription' },
+  'system-serif': { label: 'systemSerif', description: 'systemSerifDescription' },
+  'system-mono': { label: 'systemMono', description: 'systemMonoDescription' },
+  'humanist-sans': { label: 'humanistSans', description: 'humanistSansDescription' },
+  'reading-serif': { label: 'readingSerif', description: 'readingSerifDescription' },
+};
+
 export function SettingsPanel({
   open,
   settings,
@@ -51,6 +64,7 @@ export function SettingsPanel({
   onOpenLink,
   onClose,
 }: SettingsPanelProps) {
+  const { t } = useI18n();
   const [version, setVersion] = useState('0.1.0');
 
   useEffect(() => {
@@ -89,41 +103,41 @@ export function SettingsPanel({
       >
         <header className="settings-header">
           <div>
-            <span className="pane-kicker">Preferences</span>
-            <h2 id="settings-title">Settings</h2>
+            <span className="pane-kicker">{t('preferences')}</span>
+            <h2 id="settings-title">{t('settings')}</h2>
           </div>
-          <button className="icon-close" type="button" onClick={onClose} aria-label="Close settings">
+          <button className="icon-close" type="button" onClick={onClose} aria-label={t('closeSettings')}>
             ×
           </button>
         </header>
 
         <div className="settings-scroll">
-          <SettingsSection title="Appearance" description="Tune Markora for the way you write.">
-            <SettingRow label="Color mode">
+          <SettingsSection title={t('appearance')} description={t('appearanceDescription')}>
+            <SettingRow label={t('colorMode')}>
               <select
                 value={settings.themeMode}
                 onChange={(event) =>
                   onUpdate({ themeMode: event.target.value as EditorSettings['themeMode'] })
                 }
               >
-                <option value="system">System</option>
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
+                <option value="system">{t('system')}</option>
+                <option value="light">{t('light')}</option>
+                <option value="dark">{t('dark')}</option>
               </select>
             </SettingRow>
-            <SettingRow label="Editor theme">
+            <SettingRow label={t('editorTheme')}>
               <select
                 value={settings.editorTheme}
                 onChange={(event) =>
                   onUpdate({ editorTheme: event.target.value as EditorSettings['editorTheme'] })
                 }
               >
-                <option value="graphite">Graphite</option>
-                <option value="aurora">Aurora</option>
-                <option value="paper">Paper</option>
+                <option value="graphite">{t('graphite')}</option>
+                <option value="aurora">{t('aurora')}</option>
+                <option value="paper">{t('paper')}</option>
               </select>
             </SettingRow>
-            <SettingRow label="Writing font">
+            <SettingRow label={t('writingFont')}>
               <select
                 value={settings.fontPreset}
                 onChange={(event) =>
@@ -131,26 +145,28 @@ export function SettingsPanel({
                 }
               >
                 {LOCAL_FONT_PRESETS.map((preset) => (
-                  <option key={preset.id} value={preset.id} title={preset.description}>
-                    {preset.label}
+                  <option
+                    key={preset.id}
+                    value={preset.id}
+                    title={t(FONT_COPY[preset.id].description)}
+                  >
+                    {t(FONT_COPY[preset.id].label)}
                   </option>
                 ))}
               </select>
             </SettingRow>
-            <p className="settings-note">
-              Writing fonts use local/system font stacks only. Markora never downloads a remote font.
-            </p>
-            <SettingRow label="Workspace layout">
+            <p className="settings-note">{t('localFontNote')}</p>
+            <SettingRow label={t('workspaceLayout')}>
               <select
                 value={layoutMode}
                 onChange={(event) => onLayoutModeChange(event.target.value as LayoutMode)}
               >
-                <option value="split">Split editor and preview</option>
-                <option value="editor">Editor only</option>
-                <option value="preview">Preview only</option>
+                <option value="split">{t('splitEditorPreview')}</option>
+                <option value="editor">{t('editorOnly')}</option>
+                <option value="preview">{t('previewOnly')}</option>
               </select>
             </SettingRow>
-            <SettingRow label={`Editor share in split view — ${editorPanePercent}%`}>
+            <SettingRow label={t('editorShare', { percent: editorPanePercent })}>
               <input
                 type="range"
                 min="30"
@@ -161,8 +177,8 @@ export function SettingsPanel({
                 onChange={(event) => onEditorPanePercentChange(Number(event.target.value))}
               />
             </SettingRow>
-            <button type="button" onClick={onResetLayout}>Reset layout</button>
-            <SettingRow label={`Font size — ${settings.fontSize}px`}>
+            <button type="button" onClick={onResetLayout}>{t('resetLayout')}</button>
+            <SettingRow label={t('fontSizeLabel', { size: settings.fontSize })}>
               <input
                 type="range"
                 min="12"
@@ -172,7 +188,7 @@ export function SettingsPanel({
                 onChange={(event) => onUpdate({ fontSize: Number(event.target.value) })}
               />
             </SettingRow>
-            <SettingRow label={`Line height — ${settings.lineHeight.toFixed(2)}`}>
+            <SettingRow label={t('lineHeightLabel', { height: settings.lineHeight.toFixed(2) })}>
               <input
                 type="range"
                 min="1.2"
@@ -182,36 +198,37 @@ export function SettingsPanel({
                 onChange={(event) => onUpdate({ lineHeight: Number(event.target.value) })}
               />
             </SettingRow>
-            <Toggle label="Word wrap" checked={settings.wordWrap} onChange={(wordWrap) => onUpdate({ wordWrap })} />
+            <Toggle label={t('wordWrap')} checked={settings.wordWrap} onChange={(wordWrap) => onUpdate({ wordWrap })} />
             <Toggle
-              label="Show outline"
+              label={t('showOutline')}
               checked={settings.showOutline}
               onChange={(showOutline) => onUpdate({ showOutline })}
             />
             <Toggle
-              label="Show preview in split layout"
+              label={t('showPreviewSplit')}
               checked={settings.showPreview}
               onChange={(showPreview) => onUpdate({ showPreview })}
             />
           </SettingsSection>
 
-          <SettingsSection
-            title="Print & PDF"
-            description="Control the operating-system print/PDF output without adding a network service."
-          >
-            <SettingRow label="Page size">
+          <SettingsSection title={t('language')} description={t('languageDescription')}>
+            <LanguageSettings />
+          </SettingsSection>
+
+          <SettingsSection title={t('printPdf')} description={t('printPdfDescription')}>
+            <SettingRow label={t('pageSize')}>
               <select
                 value={settings.printPageSize}
                 onChange={(event) =>
                   onUpdate({ printPageSize: event.target.value as EditorSettings['printPageSize'] })
                 }
               >
-                <option value="auto">Printer default</option>
-                <option value="a4">A4</option>
-                <option value="letter">US Letter</option>
+                <option value="auto">{t('printerDefault')}</option>
+                <option value="a4">{t('a4')}</option>
+                <option value="letter">{t('usLetter')}</option>
               </select>
             </SettingRow>
-            <SettingRow label={`Page margin — ${settings.printMarginMm} mm`}>
+            <SettingRow label={t('pageMargin', { margin: settings.printMarginMm })}>
               <input
                 type="range"
                 min="5"
@@ -222,30 +239,25 @@ export function SettingsPanel({
               />
             </SettingRow>
             <Toggle
-              label="Keep headings with following content"
+              label={t('keepHeadings')}
               checked={settings.printKeepHeadings}
               onChange={(printKeepHeadings) => onUpdate({ printKeepHeadings })}
             />
             <Toggle
-              label="Wrap long code lines"
+              label={t('wrapCodeLines')}
               checked={settings.printCodeWrap}
               onChange={(printCodeWrap) => onUpdate({ printCodeWrap })}
             />
             <Toggle
-              label="Include print metadata header"
+              label={t('includePrintMetadata')}
               checked={settings.printMetadata}
               onChange={(printMetadata) => onUpdate({ printMetadata })}
             />
-            <p className="settings-note">
-              These options generate a bounded local print stylesheet. PDF creation still uses the system/browser print dialog.
-            </p>
+            <p className="settings-note">{t('printSettingsNote')}</p>
             <ExportTemplatePicker onUpdate={onUpdate} />
           </SettingsSection>
 
-          <SettingsSection
-            title="Workspace presets"
-            description="Save named local preference/layout combinations for different writing workflows."
-          >
+          <SettingsSection title={t('workspacePresets')} description={t('workspacePresetsDescription')}>
             <SessionPresetManager
               settings={settings}
               layoutMode={layoutMode}
@@ -256,19 +268,13 @@ export function SettingsPanel({
             />
           </SettingsSection>
 
-          <SettingsSection
-            title="Keyboard shortcuts"
-            description="Remap core Ctrl/Command shortcuts locally without changing command behavior."
-          >
+          <SettingsSection title={t('keyboardShortcuts')} description={t('keyboardShortcutsDescription')}>
             <ShortcutSettings />
           </SettingsSection>
 
-          <SettingsSection
-            title="Privacy & data"
-            description="Editing is local-first. Markora has no account requirement and no analytics pipeline."
-          >
-            <Toggle label="Autosave files that already have a path" checked={settings.autosave} onChange={(autosave) => onUpdate({ autosave })} />
-            <SettingRow label={`Autosave delay — ${(settings.autosaveDelayMs / 1000).toFixed(1)}s`}>
+          <SettingsSection title={t('privacy')} description={t('privacyDescription')}>
+            <Toggle label={t('autosaveFiles')} checked={settings.autosave} onChange={(autosave) => onUpdate({ autosave })} />
+            <SettingRow label={t('autosaveDelay', { seconds: (settings.autosaveDelayMs / 1000).toFixed(1) })}>
               <input
                 type="range"
                 min="500"
@@ -280,19 +286,14 @@ export function SettingsPanel({
               />
             </SettingRow>
             <div className="button-row">
-              <button type="button" onClick={onReloadActiveFromDisk}>Reload active file from disk</button>
-              <button type="button" onClick={onExportBackup}>Export workspace backup</button>
-              <button type="button" onClick={onRestoreBackup}>Restore backup</button>
+              <button type="button" onClick={onReloadActiveFromDisk}>{t('reloadDisk')}</button>
+              <button type="button" onClick={onExportBackup}>{t('exportWorkspaceBackup')}</button>
+              <button type="button" onClick={onRestoreBackup}>{t('restoreBackup')}</button>
             </div>
-            <p className="settings-note">
-              Autosave pauses when Markora detects that a file changed outside the app. Recovered dirty disk files require one explicit save before autosave resumes.
-            </p>
+            <p className="settings-note">{t('autosaveConflictNote')}</p>
           </SettingsSection>
 
-          <SettingsSection
-            title="Recovery"
-            description="Inspect the local workspace snapshot before removing recovered documents or resetting the session."
-          >
+          <SettingsSection title={t('recovery')} description={t('recoveryDescription')}>
             <RecoveryInspector
               tabs={tabs}
               activeId={activeId}
@@ -302,41 +303,37 @@ export function SettingsPanel({
             />
           </SettingsSection>
 
-          <SettingsSection title="Accessibility" description="Keyboard-first controls and readable motion defaults.">
+          <SettingsSection title={t('accessibility')} description={t('accessibilityDescription')}>
             <Toggle
-              label="Reduce motion"
+              label={t('reducedMotion')}
               checked={settings.reducedMotion}
               onChange={(reducedMotion) => onUpdate({ reducedMotion })}
             />
-            <p className="settings-note">
-              All primary actions are keyboard reachable. Focus rings remain visible in every theme.
-            </p>
+            <p className="settings-note">{t('accessibilityNote')}</p>
           </SettingsSection>
 
-          <SettingsSection title="Updates" description="Release builds are published through GitHub Releases.">
-            <p className="settings-note">
-              Markora does not silently install updates. Check release notes before replacing an installed build.
-            </p>
+          <SettingsSection title={t('updates')} description={t('updatesDescription')}>
+            <p className="settings-note">{t('updatesNote')}</p>
             <button type="button" onClick={() => void onOpenLink('https://github.com/sanskarIN/markora/releases')}>
-              Open releases
+              {t('openReleases')}
             </button>
           </SettingsSection>
 
-          <SettingsSection title="About" description={`Markora ${version} · MIT License`}>
+          <SettingsSection title={t('about')} description={`${t('appName')} ${version} · MIT License`}>
             <div className="about-card">
-              <img src="/markora-logo.svg" alt="Markora logo" width="56" height="56" />
+              <img src="/markora-logo.svg" alt={t('markoraLogo')} width="56" height="56" />
               <div>
-                <strong>Markora</strong>
-                <p>A secure, local-first Markdown editor for Windows, macOS, and Linux.</p>
-                <b>Made by the Sanskar</b>
+                <strong>{t('appName')}</strong>
+                <p>{t('aboutDescription')}</p>
+                <b>{t('madeBy')}</b>
               </div>
             </div>
             <div className="about-links">
-              <button type="button" onClick={() => void onOpenLink('https://github.com/sanskarIN')}>GitHub</button>
-              <button type="button" onClick={() => void onOpenLink('https://buymeacoffee.com/sanskarIN')}>Buy Me a Coffee</button>
-              <button type="button" onClick={() => void onOpenLink('mailto:sanskarin@outlook.in')}>Business email</button>
-              <button type="button" onClick={() => void onOpenLink('mailto:sanskarin.business@gmail.com')}>Alternate business email</button>
-              <button type="button" onClick={() => void onOpenLink('mailto:supportramsandesh@gmail.com')}>Support</button>
+              <button type="button" onClick={() => void onOpenLink('https://github.com/sanskarIN')}>{t('github')}</button>
+              <button type="button" onClick={() => void onOpenLink('https://buymeacoffee.com/sanskarIN')}>{t('buyMeCoffee')}</button>
+              <button type="button" onClick={() => void onOpenLink('mailto:sanskarin@outlook.in')}>{t('businessEmail')}</button>
+              <button type="button" onClick={() => void onOpenLink('mailto:sanskarin.business@gmail.com')}>{t('alternateBusinessEmail')}</button>
+              <button type="button" onClick={() => void onOpenLink('mailto:supportramsandesh@gmail.com')}>{t('support')}</button>
             </div>
           </SettingsSection>
         </div>
