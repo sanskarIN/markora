@@ -1,6 +1,7 @@
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { useEffect, useState } from 'react';
 
+import { useI18n } from '../i18n';
 import { isDesktopRuntime } from '../lib/platform';
 
 interface FileDropOptions {
@@ -10,6 +11,7 @@ interface FileDropOptions {
 }
 
 export function useFileDrop({ onDesktopPaths, onBrowserFiles, onError }: FileDropOptions) {
+  const { t } = useI18n();
   const [dragActive, setDragActive] = useState(false);
 
   useEffect(() => {
@@ -27,7 +29,7 @@ export function useFileDrop({ onDesktopPaths, onBrowserFiles, onError }: FileDro
           setDragActive(false);
           if (event.payload.type === 'drop' && event.payload.paths.length) {
             void Promise.resolve(onDesktopPaths(event.payload.paths)).catch(() => {
-              onError('Could not open the dropped files.');
+              onError(t('dropOpenFailed'));
             });
           }
         })
@@ -35,7 +37,7 @@ export function useFileDrop({ onDesktopPaths, onBrowserFiles, onError }: FileDro
           if (disposed) cleanup();
           else unlisten = cleanup;
         })
-        .catch(() => onError('Desktop file drop could not be initialized.'));
+        .catch(() => onError(t('dropInitFailed')));
 
       return () => {
         disposed = true;
@@ -59,7 +61,7 @@ export function useFileDrop({ onDesktopPaths, onBrowserFiles, onError }: FileDro
       event.preventDefault();
       setDragActive(false);
       void Promise.resolve(onBrowserFiles(Array.from(event.dataTransfer.files))).catch(() => {
-        onError('Could not open the dropped files.');
+        onError(t('dropOpenFailed'));
       });
     };
 
@@ -71,7 +73,7 @@ export function useFileDrop({ onDesktopPaths, onBrowserFiles, onError }: FileDro
       window.removeEventListener('dragleave', handleDragLeave);
       window.removeEventListener('drop', handleDrop);
     };
-  }, [onBrowserFiles, onDesktopPaths, onError]);
+  }, [onBrowserFiles, onDesktopPaths, onError, t]);
 
   return dragActive;
 }
