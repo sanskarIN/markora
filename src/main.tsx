@@ -8,6 +8,7 @@ import './advanced.css';
 import './outline.css';
 import './drop.css';
 import './recovery.css';
+import './accessibility.css';
 
 const root = document.getElementById('root');
 
