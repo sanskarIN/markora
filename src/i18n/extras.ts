@@ -36,6 +36,7 @@ export const extraEn = {
   closeSettings: 'Close settings',
   dropOpenFailed: 'Could not open the dropped files.',
   dropInitFailed: 'Desktop file drop could not be initialized.',
+  blockedImage: 'Blocked image',
 } as const;
 
 export type ExtraTranslationKey = keyof typeof extraEn;
@@ -78,4 +79,5 @@ export const extraHi: Record<ExtraTranslationKey, string> = {
   closeSettings: 'सेटिंग्स बंद करें',
   dropOpenFailed: 'छोड़ी गई फ़ाइलें नहीं खोली जा सकीं।',
   dropInitFailed: 'डेस्कटॉप फ़ाइल ड्रॉप शुरू नहीं किया जा सका।',
+  blockedImage: 'अवरुद्ध छवि',
 };
