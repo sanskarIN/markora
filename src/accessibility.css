@@ -1,0 +1,135 @@
+.markdown-editor,
+.markdown-preview p,
+.markdown-preview li,
+.markdown-preview blockquote,
+.markdown-preview td,
+.markdown-preview th,
+.markdown-preview h1,
+.markdown-preview h2,
+.markdown-preview h3,
+.markdown-preview h4,
+.markdown-preview h5,
+.markdown-preview h6 {
+  unicode-bidi: plaintext;
+}
+
+.tab-main,
+.outline-item,
+.recent-item,
+.markdown-preview th,
+.markdown-preview td {
+  text-align: start;
+}
+
+.markdown-preview blockquote {
+  margin-inline: 0;
+  padding-inline-start: 16px;
+  padding-inline-end: 0;
+  border-left: 0;
+  border-inline-start: 4px solid var(--accent);
+}
+
+.markdown-preview input[type='checkbox'] {
+  margin-right: 0;
+  margin-inline-end: 7px;
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --border: color-mix(in srgb, var(--text) 42%, var(--surface));
+    --border-strong: color-mix(in srgb, var(--text) 62%, var(--surface));
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  a:focus-visible {
+    outline-width: 4px;
+  }
+}
+
+@media (forced-colors: active) {
+  :root,
+  :root[data-theme='dark'],
+  :root[data-editor-theme='aurora'],
+  :root[data-editor-theme='paper'],
+  :root[data-theme='dark'][data-editor-theme='aurora'],
+  :root[data-theme='dark'][data-editor-theme='paper'] {
+    --bg: Canvas;
+    --surface: Canvas;
+    --surface-2: Canvas;
+    --surface-3: Canvas;
+    --text: CanvasText;
+    --muted: CanvasText;
+    --subtle: GrayText;
+    --border: ButtonBorder;
+    --border-strong: CanvasText;
+    --accent: Highlight;
+    --accent-soft: Canvas;
+    --accent-strong: LinkText;
+    --success: CanvasText;
+    --warning: CanvasText;
+    --danger: CanvasText;
+    --shadow: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  button,
+  input,
+  select,
+  textarea,
+  a,
+  [role='tab'],
+  [role='option'] {
+    forced-color-adjust: auto;
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  a:focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  .tab.is-active,
+  .toolbar-button[aria-pressed='true'],
+  .sidebar-tabs button.is-active,
+  .command-item.is-active,
+  .recovery-item.is-active {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  .security-pill,
+  .blocked-image,
+  .markdown-preview pre,
+  .markdown-preview th,
+  .markdown-preview td,
+  .find-row button,
+  .settings-panel button {
+    border-color: CanvasText;
+  }
+
+  .markdown-preview pre {
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .modal-backdrop,
+  .onboarding-backdrop {
+    background: Canvas;
+  }
+
+  .dirty-dot {
+    color: Highlight;
+  }
+}
