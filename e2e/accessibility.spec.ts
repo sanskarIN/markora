@@ -24,8 +24,10 @@ test('interactive controls expose accessible names', async ({ page }) => {
         .join(' ')
         .trim();
       const labels =
-        'labels' in element && element.labels
-          ? Array.from(element.labels).map((label) => label.textContent?.trim() ?? '').join(' ').trim()
+        element instanceof HTMLInputElement ||
+        element instanceof HTMLSelectElement ||
+        element instanceof HTMLTextAreaElement
+          ? Array.from(element.labels ?? []).map((label) => label.textContent?.trim() ?? '').join(' ').trim()
           : '';
       const buttonText = element instanceof HTMLButtonElement ? element.textContent?.trim() ?? '' : '';
       const title = html.getAttribute('title')?.trim() ?? '';
