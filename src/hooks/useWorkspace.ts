@@ -66,7 +66,7 @@ function initialWorkspace(): WorkspaceState {
 }
 
 export function useWorkspace() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [state, setState] = useState<WorkspaceState>(initialWorkspace);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const initialRecoveryRef = useRef(loadWorkspace() !== null);
@@ -423,14 +423,17 @@ export function useWorkspace() {
   const exportHtml = useCallback(async () => {
     if (!activeTab) return;
     try {
-      const html = renderMarkdownDocument(activeTab.content, activeTab.title);
+      const html = renderMarkdownDocument(activeTab.content, activeTab.title, {
+        lang: locale,
+        imageLabel: t('blockedImage'),
+      });
       const result = await exportHtmlFile(html, activeTab.title);
       if (result) notify('success', t('htmlExportCreated'));
     } catch (error: unknown) {
       logger.error('html_export_failed', { message: errorMessage(error) });
       notify('error', errorMessage(error, t('unexpectedError')));
     }
-  }, [activeTab, notify, t]);
+  }, [activeTab, locale, notify, t]);
 
   const exportBackup = useCallback(async () => {
     try {
