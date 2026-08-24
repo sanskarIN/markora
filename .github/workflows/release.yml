@@ -43,6 +43,12 @@ jobs:
       - name: Install frontend dependencies
         run: npm install --no-audit --no-fund
 
+      - name: Check synchronized version metadata
+        run: npm run version:check
+
+      - name: Check release tag matches package version
+        run: npm run release:check
+
       - name: Generate platform icons
         run: npm run icons
 
