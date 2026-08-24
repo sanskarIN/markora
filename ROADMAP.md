@@ -39,7 +39,7 @@ This roadmap prioritizes coherent improvements to the Markdown writing experienc
 - [x] Cross-platform CI and release workflows.
 - [x] CodeQL, dependency audit, secret scan, Dependabot.
 - [x] Documentation and ADR baseline.
-- [ ] Confirm clean hosted CI across Windows, macOS, and Linux and fix any environment-specific defects discovered by the first run.
+- [ ] Confirm clean hosted CI across Windows, macOS, and Linux and fix any environment-specific defects discovered by the current release-candidate run.
 - [ ] Replace illustrative README preview with release-build screenshots after successful packaged-app verification.
 
 ## v0.2 — Editing depth
@@ -68,12 +68,41 @@ Implemented scope:
 
 ## v0.4 — Internationalization and accessibility expansion
 
-- [ ] Move all remaining visible strings through the i18n catalog.
-- [ ] Add locale loading architecture and first translated language pack based on contributor demand.
-- [ ] Automated accessibility regression checks where reliable.
-- [ ] Screen-reader/manual test matrix for primary desktop platforms.
-- [ ] High-contrast theme audit and platform forced-colors support.
-- [ ] Bidirectional-text and complex-script editing/preview test fixtures.
+- [x] Move application-visible UI strings through the i18n catalog or defer native picker chrome to the operating system locale.
+- [x] Add locale loading architecture and the first translated language pack (Hindi) with persistent language selection.
+- [x] Add automated accessibility regression checks where reliable.
+- [x] Define the screen-reader/manual test matrix for primary desktop platforms.
+- [x] Add high-contrast/forced-colors support and automated regression coverage.
+- [x] Add bidirectional-text and complex-script editing/preview fixtures.
+
+## v0.5 — Stable-release candidate hardening
+
+The repository metadata is prepared for **v0.5.0**. This milestone is intentionally the release-candidate line before stable v1.0 rather than a claim that manual platform verification has already happened.
+
+### Completed in source
+
+- [x] Synchronize npm, Cargo, and Tauri version metadata with an automated drift guard.
+- [x] Reject release tags that do not match package version metadata.
+- [x] Add conservative automated startup, preview, large-outline, and production bundle-size regression budgets.
+- [x] Add restart/webview-replacement recovery tests for unsaved local content.
+- [x] Document stable desktop compatibility/support policy and separate Android release readiness.
+- [x] Document Windows/macOS/Linux install, upgrade, and uninstall verification procedures.
+- [x] Document signing/notarization credential boundaries and verification strategy.
+- [x] Re-review the current Tauri security model against current Tauri 2 guidance.
+- [x] Replace implicit Tauri application-command access with an explicit `AppManifest` and platform-specific permissions.
+- [x] Remove broad `core:default`/event emit permissions and add a capability-regression audit to quality/CI/release workflows.
+- [x] Derive runtime/About version labels from synchronized package metadata.
+
+### Release-candidate evidence still required
+
+- [ ] Confirm the latest hosted frontend, Rust, Android (where applicable), and Windows/macOS/Linux desktop build workflows are clean.
+- [ ] Install, launch, smoke-test, upgrade where applicable, and uninstall the produced Windows artifact.
+- [ ] Install, launch, smoke-test, upgrade where applicable, and uninstall the produced macOS artifact.
+- [ ] Install, launch, smoke-test, upgrade where applicable, and uninstall the produced Linux artifact/package form(s) being published.
+- [ ] Record packaged startup and package-size measurements for each stable desktop target.
+- [ ] Complete and record the manual screen-reader rows in `docs/accessibility.md` on real packaged builds.
+- [ ] Capture privacy-safe screenshots from verified packaged release builds and replace the illustrative README preview when appropriate.
+- [ ] Record actual signing/notarization status for every published artifact; configure real credentials only through protected release secrets when available.
 
 ## v1.0 — Stable desktop release
 
@@ -88,6 +117,8 @@ Stability criteria include:
 - core journeys covered by stable automation and manual accessibility review;
 - performance budgets measured on representative large Markdown files;
 - security model re-reviewed with current dependencies and Tauri guidance.
+
+The source/documentation portions of these criteria are now largely implemented in v0.5.0. **v1.0.0 must not be declared stable until the remaining packaged/manual evidence in the v0.5 section is completed and recorded.**
 
 ## Ideas not currently planned
 
