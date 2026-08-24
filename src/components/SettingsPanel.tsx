@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useI18n, type AppTranslationKey } from '../i18n';
 import { getLocalFontStack, LOCAL_FONT_PRESETS } from '../lib/fonts';
 import type { LayoutMode } from '../lib/layout';
-import { getAppVersion } from '../lib/platform';
+import { BUILD_VERSION, getAppVersion } from '../lib/platform';
 import { buildPrintStyle } from '../lib/print';
 import type { DocumentTab, EditorSettings } from '../types';
 import { ExportTemplatePicker } from './ExportTemplatePicker';
@@ -65,7 +65,7 @@ export function SettingsPanel({
   onClose,
 }: SettingsPanelProps) {
   const { t } = useI18n();
-  const [version, setVersion] = useState('0.1.0');
+  const [version, setVersion] = useState(BUILD_VERSION);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--writing-font', getLocalFontStack(settings.fontPreset));
@@ -87,7 +87,7 @@ export function SettingsPanel({
 
   useEffect(() => {
     if (!open) return;
-    void getAppVersion().then(setVersion).catch(() => setVersion('0.1.0'));
+    void getAppVersion().then(setVersion).catch(() => setVersion(BUILD_VERSION));
   }, [open]);
 
   if (!open) return null;
@@ -144,15 +144,14 @@ export function SettingsPanel({
                   onUpdate({ fontPreset: event.target.value as EditorSettings['fontPreset'] })
                 }
               >
-                {LOCAL_FONT_PRESETS.map((preset) => (
-                  <option
-                    key={preset.id}
-                    value={preset.id}
-                    title={t(FONT_COPY[preset.id].description)}
-                  >
-                    {t(FONT_COPY[preset.id].label)}
-                  </option>
-                ))}
+                {LOCAL_FONT_PRESETS.map((preset) => {
+                  const copy = FONT_COPY[preset.id];
+                  return (
+                    <option key={preset.id} value={preset.id} title={t(copy.description)}>
+                      {t(copy.label)}
+                    </option>
+                  );
+                })}
               </select>
             </SettingRow>
             <p className="settings-note">{t('localFontNote')}</p>
@@ -209,10 +208,6 @@ export function SettingsPanel({
               checked={settings.showPreview}
               onChange={(showPreview) => onUpdate({ showPreview })}
             />
-          </SettingsSection>
-
-          <SettingsSection title={t('language')} description={t('languageDescription')}>
-            <LanguageSettings />
           </SettingsSection>
 
           <SettingsSection title={t('printPdf')} description={t('printPdfDescription')}>
@@ -310,6 +305,7 @@ export function SettingsPanel({
               onChange={(reducedMotion) => onUpdate({ reducedMotion })}
             />
             <p className="settings-note">{t('accessibilityNote')}</p>
+            <LanguageSettings />
           </SettingsSection>
 
           <SettingsSection title={t('updates')} description={t('updatesDescription')}>
@@ -319,7 +315,7 @@ export function SettingsPanel({
             </button>
           </SettingsSection>
 
-          <SettingsSection title={t('about')} description={`${t('appName')} ${version} · MIT License`}>
+          <SettingsSection title={t('about')} description={`Markora ${version} · MIT License`}>
             <div className="about-card">
               <img src="/markora-logo.svg" alt={t('markoraLogo')} width="56" height="56" />
               <div>
