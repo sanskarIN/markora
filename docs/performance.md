@@ -1,6 +1,6 @@
 # Markora performance
 
-Markora keeps the editing path local and deliberately avoids network work. Performance changes should be measured against representative documents instead of justified by intuition alone.
+Markora keeps the editing path local and deliberately avoids network work. Performance changes are measured against representative, synthetic documents instead of justified by intuition alone.
 
 ## Performance goals
 
@@ -15,6 +15,21 @@ For normal Markdown documents on a supported desktop system, Markora should:
 
 These are product goals rather than guarantees for arbitrarily large files or extremely slow hardware.
 
+## Automated release regression budgets
+
+The repository now includes deliberately conservative CI tripwires. They are intended to catch major regressions across shared runners rather than act as a hardware-independent SLA.
+
+| Measurement | Automated budget | Coverage |
+| --- | ---: | --- |
+| Frontend DOM startup to interactive editor | `< 7,000 ms` | `e2e/performance.spec.ts` |
+| Medium synthetic Markdown fill to final preview heading | `< 4,000 ms` | `e2e/performance.spec.ts` |
+| Filtering a 1,200-heading outline to a target heading | `< 2,000 ms` | `e2e/performance.spec.ts` |
+| Production `dist/` size | `<= 3 MiB` | `scripts/check-web-bundle-size.mjs` |
+
+A budget failure should trigger investigation before increasing the threshold. If runner noise is proven to be the cause, document the evidence before changing the budget.
+
+The browser timings include React/webview work and Playwright interaction overhead. They intentionally do not claim native package startup latency because a packaged Tauri executable must be measured on the actual target OS.
+
 ## Existing safeguards
 
 The current architecture includes several bounded behaviors:
@@ -26,21 +41,22 @@ The current architecture includes several bounded behaviors:
 - outline rendering/search includes large-document handling;
 - autosave is delayed/debounced rather than writing on every keystroke;
 - preview images are not fetched remotely;
-- no analytics/background synchronization pipeline runs while editing.
+- no analytics/background synchronization pipeline runs while editing;
+- the production web bundle has an automated size ceiling.
 
 ## Representative fixtures
 
 Performance testing should include at least:
 
 1. **Small note** — a few hundred words, headings, lists, links.
-2. **Medium document** — tens of thousands of characters with tables and fenced code.
+2. **Medium document** — tens of thousands of characters with links, lists, and inline formatting.
 3. **Large outline document** — hundreds/thousands of headings to stress navigation/search.
 4. **Code-heavy document** — many fenced blocks to stress highlighting/rendering.
 5. **Long-line document** — large code/text lines to test wrapping and editor scrolling.
 
-Use synthetic/non-sensitive fixtures committed specifically for testing when appropriate.
+Only synthetic/non-sensitive fixture content should be committed to automated tests.
 
-## What to measure
+## What to measure manually for a release candidate
 
 For frontend profiling, capture:
 
@@ -53,10 +69,13 @@ For frontend profiling, capture:
 
 For native operations, capture:
 
+- packaged-app startup to usable editor;
 - bounded read duration by file size;
 - save/atomic replacement duration;
 - fingerprint check duration;
-- startup/package size where changes affect dependencies.
+- installer/package size.
+
+Record the device, CPU/RAM class, OS version, architecture, build mode, fixture size, and commit SHA with manual results. Do not compare measurements from materially different machines as though they were identical benchmarks.
 
 ## Profiling workflow
 
@@ -64,7 +83,14 @@ Use a production-like frontend build when comparing regressions:
 
 ```bash
 npm run build
+npm run size:check
 npm run preview
+```
+
+Run the automated browser budgets with:
+
+```bash
+npm run test:e2e -- e2e/performance.spec.ts
 ```
 
 For desktop-specific behavior:
@@ -73,7 +99,7 @@ For desktop-specific behavior:
 npm run tauri:build
 ```
 
-Use the browser/webview performance profiler for React/render work and normal OS timing/profiling tools for native operations. Record the device, OS, build mode, fixture size, and commit SHA with results.
+Use the browser/webview performance profiler for React/render work and normal OS timing/profiling tools for native operations.
 
 ## Optimization rules
 
@@ -101,8 +127,13 @@ Preview cost depends on Markdown length, GFM features, syntax highlighting, and 
 
 Do not bypass `rehype-sanitize` or safe URL handling as an optimization.
 
-## Release performance gate
+## Stable-release performance gate
 
-Before v1.0, record repeatable measurements for representative fixtures and define concrete regression thresholds for at least typing, preview rendering, large-outline navigation, startup, and package size. Until those measurements are recorded, avoid claiming a numerical performance SLA.
+Before publishing a stable release:
 
-Any measured major regression should be documented in `what_changed.md` and fixed or explicitly accepted before a stable release.
+1. automated browser budgets and the production bundle budget must pass on the release commit;
+2. packaged startup and package size must be recorded on each target OS during release-candidate smoke testing;
+3. any material regression against the previous verified release must be explained in `what_changed.md` and fixed or explicitly accepted;
+4. thresholds must not be raised only to make CI green.
+
+The budgets in this document are regression guards, not a promise that every device will produce the same timings.
