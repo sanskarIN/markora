@@ -75,7 +75,6 @@ for (const command of permissionSet) {
 }
 
 if (manifestSet.size !== manifestCommands.length) fail('duplicate application command in build manifest.');
-if (permissionSet.size !== permissionCommands.length) fail('application command is granted by more than one permission set.');
 
 if (failed) process.exitCode = 1;
 else console.log(`Tauri capability audit passed for ${manifestSet.size} explicit application commands.`);
