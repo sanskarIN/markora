@@ -87,6 +87,29 @@ npm run icons
 npm run tauri:dev
 ```
 
+## Android
+
+Android uses the same React/TypeScript application with Tauri's mobile shell, native document picker, scoped filesystem plugin, persisted document scopes, and platform URL opener.
+
+Install Android Studio plus the Android SDK Platform, Platform-Tools, Build-Tools, command-line tools, and side-by-side NDK. Configure `JAVA_HOME`, `ANDROID_HOME`, and `NDK_HOME`, then install the Rust Android targets.
+
+Initialize and run Markora with:
+
+```bash
+npm install
+npm run android:init
+npm run icons
+npm run android:dev
+```
+
+Build an ARM64 debug APK with:
+
+```bash
+npm run android:build -- --debug --apk --target aarch64
+```
+
+See [android.md](android.md) for complete Linux/macOS/Windows environment setup, Android file-access behavior, APK/AAB builds, CI verification, testing, signing boundaries, and release checks.
+
 ## Browser-only frontend development
 
 For UI work that does not require native file APIs:
@@ -123,15 +146,16 @@ cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets --all-features -
 cargo test --manifest-path src-tauri/Cargo.toml --all-features
 ```
 
-For the full matrix including Playwright, see `docs/testing.md`.
+For the full matrix including Playwright and Android packaging, see `docs/testing.md` and `.github/workflows/android.yml`.
 
 ## IDE guidance
 
-Any editor is supported. For VS Code, useful capabilities include TypeScript/React language support, rust-analyzer, ESLint, Prettier, and TOML support. Do not install extensions that require uploading private Markdown content in order to edit Markora documents.
+Any editor is supported. For VS Code, useful capabilities include TypeScript/React language support, rust-analyzer, ESLint, Prettier, and TOML support. Android Studio is additionally recommended for Android SDK/AVD management and native Android project inspection. Do not install extensions that require uploading private Markdown content in order to edit Markora documents.
 
 ## Data locations and privacy during development
 
 - Document files stay at paths explicitly selected by the user.
+- Android document-provider access is restricted to picker-selected paths and persisted scopes.
 - Workspace recovery is stored in local webview/browser storage.
 - Markora does not require telemetry, analytics, authentication, or cloud sync.
 - External links are validated before opening.
