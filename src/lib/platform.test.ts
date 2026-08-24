@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { fileNameFromPath, isDesktopRuntime, isMobileRuntime, isTauriRuntime } from './platform';
+import packageMetadata from '../../package.json';
+import {
+  BUILD_VERSION,
+  fileNameFromPath,
+  getAppVersion,
+  isDesktopRuntime,
+  isMobileRuntime,
+  isTauriRuntime,
+} from './platform';
 
 afterEach(() => {
   Reflect.deleteProperty(window, '__TAURI_INTERNALS__');
@@ -21,6 +29,11 @@ describe('platform runtime detection', () => {
 
     expect(isTauriRuntime()).toBe(true);
     expect(isMobileRuntime('Mozilla/5.0 (Linux; Android 15; Pixel 9)')).toBe(true);
+  });
+
+  it('derives the browser version label from package metadata', async () => {
+    expect(BUILD_VERSION).toBe(packageMetadata.version);
+    expect(await getAppVersion()).toBe(`${packageMetadata.version}-web`);
   });
 });
 
