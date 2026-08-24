@@ -1,11 +1,12 @@
 {
   "$schema": "../gen/schemas/mobile-schema.json",
   "identifier": "mobile-document-capability",
-  "description": "Android and iOS permissions for user-selected Markdown, backup, and export files. Dialog-selected paths are added to the runtime filesystem scope and persisted by the persisted-scope plugin.",
+  "description": "Least-privilege Android/iOS permissions for picker-selected Markdown, backup, export files, safe external URLs, lifecycle events, and queued open-with URLs.",
   "windows": ["main"],
   "platforms": ["iOS", "android"],
   "permissions": [
-    "core:default",
+    "core:event:default",
+    "mobile-lifecycle-commands",
     "dialog:allow-open",
     "dialog:allow-save",
     "fs:allow-stat",
