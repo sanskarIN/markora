@@ -9,6 +9,22 @@
     ]
   },
   "bundle": {
+    "fileAssociations": [
+      {
+        "ext": ["md", "markdown", "mdown", "mkdn"],
+        "mimeType": "text/markdown",
+        "name": "Markdown document",
+        "role": "Editor",
+        "androidIntentActionFilters": ["View", "Send", "SendMultiple"]
+      },
+      {
+        "ext": ["txt"],
+        "mimeType": "text/plain",
+        "name": "Text document",
+        "role": "Editor",
+        "androidIntentActionFilters": ["View", "Send", "SendMultiple"]
+      }
+    ],
     "android": {
       "minSdkVersion": 24
     }
