@@ -68,7 +68,6 @@ pub struct SavedFile {
 #[tauri::command]
 pub fn open_markdown_file() -> CommandResult<Option<OpenedFile>> {
     let Some(path) = rfd::FileDialog::new()
-        .set_title("Open Markdown file")
         .add_filter("Markdown", &["md", "markdown", "mdown", "mkdn", "txt"])
         .pick_file()
     else {
@@ -104,7 +103,6 @@ pub fn save_markdown_file(
         Some(value) => PathBuf::from(value),
         None => {
             let Some(chosen) = rfd::FileDialog::new()
-                .set_title("Save Markdown file")
                 .set_file_name(&ensure_markdown_name(&suggested_name))
                 .add_filter("Markdown", &["md"])
                 .save_file()
@@ -143,7 +141,6 @@ pub fn export_html_file(html: String, suggested_name: String) -> CommandResult<O
     }
 
     let Some(path) = rfd::FileDialog::new()
-        .set_title("Export HTML")
         .set_file_name(&ensure_extension_name(&suggested_name, "html"))
         .add_filter("HTML", &["html", "htm"])
         .save_file()
@@ -172,7 +169,6 @@ pub fn save_backup_file(contents: String, suggested_name: String) -> CommandResu
     }
 
     let Some(path) = rfd::FileDialog::new()
-        .set_title("Export Markora backup")
         .set_file_name(&ensure_extension_name(&suggested_name, "json"))
         .add_filter("JSON", &["json"])
         .save_file()
@@ -197,7 +193,6 @@ pub fn save_backup_file(_contents: String, _suggested_name: String) -> CommandRe
 #[tauri::command]
 pub fn open_backup_file() -> CommandResult<Option<String>> {
     let Some(path) = rfd::FileDialog::new()
-        .set_title("Open Markora backup")
         .add_filter("JSON", &["json"])
         .pick_file()
     else {
