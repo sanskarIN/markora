@@ -36,16 +36,16 @@ pub fn run() {
         .build(tauri::generate_context!())
         .expect("failed to build Markora");
 
-    app.run(|app_handle, event| {
+    app.run(|_app_handle, _event| {
         #[cfg(any(target_os = "macos", target_os = "ios", target_os = "android"))]
-        if let tauri::RunEvent::Opened { urls } = event {
+        if let tauri::RunEvent::Opened { urls } = _event {
             use tauri::{Emitter as _, Manager as _};
 
             let payload = urls.iter().map(ToString::to_string).collect::<Vec<_>>();
-            if let Ok(mut pending) = app_handle.state::<PendingOpenedUrls>().0.lock() {
+            if let Ok(mut pending) = _app_handle.state::<PendingOpenedUrls>().0.lock() {
                 pending.extend(payload.iter().cloned());
             }
-            let _ = app_handle.emit("opened-files", payload);
+            let _ = _app_handle.emit("opened-files", payload);
         }
     });
 }
