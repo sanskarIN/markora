@@ -32,7 +32,6 @@ export async function openMarkdownFile(): Promise<OpenedFile | null> {
     const path = await openDialog({
       multiple: false,
       directory: false,
-      title: 'Open Markdown file',
       filters: [{ name: 'Markdown', extensions: MARKDOWN_EXTENSIONS }],
     });
     if (!path) return null;
@@ -84,7 +83,6 @@ export async function saveMarkdownFile(
     const target =
       path ??
       (await saveDialog({
-        title: 'Save Markdown file',
         defaultPath: name,
         filters: [{ name: 'Markdown', extensions: ['md'] }],
       }));
@@ -115,7 +113,6 @@ export async function exportHtmlFile(html: string, suggestedName: string): Promi
   const name = `${stripMarkdownExtension(suggestedName)}.html`;
   if (isMobileRuntime()) {
     const target = await saveDialog({
-      title: 'Export HTML',
       defaultPath: name,
       filters: [{ name: 'HTML', extensions: ['html', 'htm'] }],
     });
@@ -140,7 +137,6 @@ export async function saveBackupFile(contents: string): Promise<string | null> {
   const name = `markora-backup-${new Date().toISOString().slice(0, 10)}.json`;
   if (isMobileRuntime()) {
     const target = await saveDialog({
-      title: 'Export Markora backup',
       defaultPath: name,
       filters: [{ name: 'JSON', extensions: ['json'] }],
     });
@@ -161,7 +157,6 @@ export async function openBackupFile(): Promise<string | null> {
     const path = await openDialog({
       multiple: false,
       directory: false,
-      title: 'Open Markora backup',
       filters: [{ name: 'JSON', extensions: ['json'] }],
     });
     if (!path) return null;
