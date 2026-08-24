@@ -4,12 +4,15 @@ Security and privacy are release requirements for Markora. Please report suspect
 
 ## Supported versions
 
-Until the first stable release, security fixes target the current `main` branch and the newest published preview release. After stable releases begin, this table will be updated with explicit support windows.
+Markora is currently preparing the **v0.5.x release-candidate line** before the first stable v1.0 desktop release.
 
 | Version | Security support |
 | --- | --- |
-| `main` / current preview | Supported |
+| `main` / current v0.5.x candidate | Supported |
+| Newest published preview/candidate | Supported while it remains the current preview line |
 | Older preview builds | Best effort; upgrade is normally required |
+
+After v1.0.0, the latest stable v1.x release line will receive security/data-loss fixes as described in `docs/support-policy.md`. Older patch releases may require upgrading to the newest patch instead of receiving backports.
 
 ## Reporting a vulnerability
 
@@ -50,15 +53,17 @@ Exact response or release times cannot be guaranteed. Severity, reproducibility,
 
 ## Security model
 
-Markora is a local-first desktop editor. Important trust boundaries include:
+Markora is a local-first editor. Important trust boundaries include:
 
 - Markdown document content;
-- filenames and filesystem paths;
+- filenames and filesystem paths/document-provider identifiers;
 - imported workspace backups;
 - rendered Markdown links;
 - exported HTML;
 - native desktop dialogs and file writes;
+- mobile picker/filesystem scopes;
 - webview-to-Rust invoke commands;
+- Tauri capabilities/application-command permissions;
 - build/release dependencies and artifacts.
 
 Current defensive design includes:
@@ -68,15 +73,24 @@ Current defensive design includes:
 - external URL scheme allow-listing;
 - remote Markdown image blocking;
 - restrictive webview/browser CSP;
-- narrow Tauri capabilities;
-- bounded native file sizes;
-- extension, regular-file, symlink, and UTF-8 validation;
+- platform-scoped least-privilege Tauri capabilities;
+- explicit Tauri application-command manifest and command permission sets;
+- frontend event listen/unlisten only, without broad core defaults or frontend emit permissions;
+- bounded native/mobile file sizes;
+- extension, regular-file, symlink, and UTF-8 validation where applicable;
 - temporary-file replacement for native writes;
 - structured log redaction;
+- safe localized error presentation instead of exposing unknown native error strings directly;
 - versioned/validated recovery and backup data;
-- CodeQL, dependency audit, and secret scanning workflows.
+- CodeQL, dependency audit, secret scanning, and capability regression checks.
 
-See `docs/architecture.md` and the ADRs for design details.
+The current pre-stable security re-review is recorded in `docs/security-review-2026-08.md`.
+
+## Current residual hardening item
+
+Desktop custom file commands accept path parameters for already-known/recent files. Those native commands validate extension/type/size/symlink boundaries, and they are available only to the local main webview through an explicit command ACL. The command parameter itself is not yet restricted by a native persisted path allowlist.
+
+This is tracked as defense-in-depth rather than a known blocker under the current CSP/sanitized-rendering/no-remote-capability model. A future hardening change should implement native authorization state rather than trusting a frontend-provided "authorized" flag.
 
 ## Out of scope / lower-priority reports
 
@@ -86,7 +100,7 @@ The following are normally not treated as vulnerabilities by themselves:
 - issues that only affect unsupported dependencies or operating systems after an upgrade path is available;
 - social engineering unrelated to Markora-controlled channels;
 - denial-of-service claims requiring unrealistically large local resources when existing size limits prevent the input path;
-- missing security headers that do not apply to the Tauri local application context;
+- missing web security headers that do not apply to the Tauri local application context;
 - automatic scanner output without a reproducible impact.
 
 A report may still be useful as hardening feedback even when it does not qualify as a vulnerability.
@@ -94,6 +108,14 @@ A report may still be useful as hardening feedback even when it does not qualify
 ## Dependency and supply-chain reporting
 
 Please report compromised dependencies, typosquatting risks, suspicious release artifacts, or workflow-permission concerns privately when they could affect users. The repository intentionally uses limited GitHub workflow permissions and pinned top-level application dependency versions where practical.
+
+Do not "fix" dependency warnings by changing versions without running the repository/Rust/mobile/build verification required for the affected dependency boundary.
+
+## Signing and release trust
+
+Signing/notarization strategy and credential isolation are documented in `docs/signing.md`. A release artifact must not be described as signed/notarized until its actual signature/notarization has been verified.
+
+Unsigned CI artifacts can be useful for testing but are not automatically trusted production installers.
 
 ## Safe research
 
