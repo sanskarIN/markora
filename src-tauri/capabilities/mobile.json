@@ -5,7 +5,8 @@
   "windows": ["main"],
   "platforms": ["iOS", "android"],
   "permissions": [
-    "core:event:default",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
     "mobile-lifecycle-commands",
     "dialog:allow-open",
     "dialog:allow-save",
