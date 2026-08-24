@@ -3,6 +3,7 @@ import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialo
 import { readTextFile, stat, writeTextFile } from '@tauri-apps/plugin-fs';
 import { openUrl } from '@tauri-apps/plugin-opener';
 
+import packageMetadata from '../../package.json';
 import type { OpenedFile, SavedFile } from '../types';
 import { ensureMarkdownExtension } from './document';
 import { normalizeExternalUrl } from './security';
@@ -11,6 +12,8 @@ const MAX_MARKDOWN_BYTES = 16 * 1024 * 1024;
 const MAX_EXPORT_BYTES = 32 * 1024 * 1024;
 const MAX_BACKUP_BYTES = 4 * 1024 * 1024;
 const MARKDOWN_EXTENSIONS = ['md', 'markdown', 'mdown', 'mkdn', 'txt'];
+
+export const BUILD_VERSION = packageMetadata.version;
 
 export function isTauriRuntime(): boolean {
   return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
@@ -193,7 +196,7 @@ export async function openExternalUrl(rawUrl: string): Promise<boolean> {
 }
 
 export async function getAppVersion(): Promise<string> {
-  if (!isTauriRuntime()) return '0.1.0-web';
+  if (!isTauriRuntime()) return `${BUILD_VERSION}-web`;
   return invoke<string>('app_version');
 }
 
