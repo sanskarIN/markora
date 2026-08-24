@@ -31,8 +31,20 @@ for (const [name, capability] of [
     fail(`${name} capability must apply only to the main window.`);
   }
   if (!Array.isArray(capability.permissions)) fail(`${name} capability permissions are missing.`);
-  if (capability.permissions?.includes('core:default')) {
-    fail(`${name} capability must not use broad core:default permissions.`);
+  for (const broadPermission of ['core:default', 'core:event:default']) {
+    if (capability.permissions?.includes(broadPermission)) {
+      fail(`${name} capability must not use broad ${broadPermission} permissions.`);
+    }
+  }
+  for (const eventPermission of ['core:event:allow-listen', 'core:event:allow-unlisten']) {
+    if (!capability.permissions?.includes(eventPermission)) {
+      fail(`${name} capability requires ${eventPermission}.`);
+    }
+  }
+  for (const unusedEventPermission of ['core:event:allow-emit', 'core:event:allow-emit-to']) {
+    if (capability.permissions?.includes(unusedEventPermission)) {
+      fail(`${name} capability must not grant unused ${unusedEventPermission}.`);
+    }
   }
 }
 
@@ -42,9 +54,7 @@ if (!sameSet(desktop.platforms ?? [], ['linux', 'macOS', 'windows'])) {
 if (!sameSet(mobile.platforms ?? [], ['android', 'iOS'])) {
   fail('mobile capability platform scope must be android/iOS only.');
 }
-if (!desktop.permissions.includes('core:event:default')) fail('desktop event permission is required for drag/drop events.');
 if (!desktop.permissions.includes('desktop-workspace-commands')) fail('desktop command permission set is missing.');
-if (!mobile.permissions.includes('core:event:default')) fail('mobile event permission is required for lifecycle/open-with events.');
 if (!mobile.permissions.includes('mobile-lifecycle-commands')) fail('mobile lifecycle command permission set is missing.');
 
 for (const required of [
