@@ -35,6 +35,9 @@ jobs:
       - name: Check synchronized version metadata
         run: npm run version:check
 
+      - name: Audit Tauri capability boundaries
+        run: npm run security:capabilities
+
       - name: Check formatting
         run: npm run format:check
 
