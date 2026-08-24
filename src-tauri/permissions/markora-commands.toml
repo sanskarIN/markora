@@ -1,0 +1,24 @@
+[[permission]]
+identifier = "desktop-workspace-commands"
+description = "Allows the desktop Markora window to invoke only the validated native document, export, link, version, and fingerprint commands used by the desktop workflow."
+platforms = ["linux", "macOS", "windows"]
+commands.allow = [
+  "open_markdown_file",
+  "read_markdown_file",
+  "save_markdown_file",
+  "export_html_file",
+  "save_backup_file",
+  "open_backup_file",
+  "open_external_url",
+  "app_version",
+  "file_fingerprint",
+]
+
+[[permission]]
+identifier = "mobile-lifecycle-commands"
+description = "Allows mobile Markora to read the application version and consume queued open-with URLs. Mobile document I/O uses scoped Tauri plugins instead of desktop file commands."
+platforms = ["android", "iOS"]
+commands.allow = [
+  "app_version",
+  "take_opened_urls",
+]
