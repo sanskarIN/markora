@@ -12,6 +12,7 @@ const MAX_MARKDOWN_BYTES: u64 = 16 * 1024 * 1024;
 const MAX_EXPORT_BYTES: usize = 32 * 1024 * 1024;
 const MAX_BACKUP_BYTES: u64 = 4 * 1024 * 1024;
 const MARKDOWN_EXTENSIONS: &[&str] = &["md", "markdown", "mdown", "mkdn", "txt"];
+const MOBILE_PLUGIN_MESSAGE: &str = "This operation is handled by Markora's mobile file picker.";
 
 #[derive(Debug)]
 enum AppError {
@@ -62,6 +63,7 @@ pub struct SavedFile {
     name: String,
 }
 
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 #[tauri::command]
 pub fn open_markdown_file() -> CommandResult<Option<OpenedFile>> {
     let Some(path) = rfd::FileDialog::new()
@@ -75,11 +77,18 @@ pub fn open_markdown_file() -> CommandResult<Option<OpenedFile>> {
     read_markdown(&path).map(Some).map_err(error_string)
 }
 
+#[cfg(any(target_os = "android", target_os = "ios"))]
+#[tauri::command]
+pub fn open_markdown_file() -> CommandResult<Option<OpenedFile>> {
+    Err(MOBILE_PLUGIN_MESSAGE.to_owned())
+}
+
 #[tauri::command]
 pub fn read_markdown_file(path: String) -> CommandResult<OpenedFile> {
     read_markdown(Path::new(&path)).map_err(error_string)
 }
 
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 #[tauri::command]
 pub fn save_markdown_file(
     path: Option<String>,
@@ -115,6 +124,17 @@ pub fn save_markdown_file(
     }))
 }
 
+#[cfg(any(target_os = "android", target_os = "ios"))]
+#[tauri::command]
+pub fn save_markdown_file(
+    _path: Option<String>,
+    _content: String,
+    _suggested_name: String,
+) -> CommandResult<Option<SavedFile>> {
+    Err(MOBILE_PLUGIN_MESSAGE.to_owned())
+}
+
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 #[tauri::command]
 pub fn export_html_file(html: String, suggested_name: String) -> CommandResult<Option<String>> {
     if html.len() > MAX_EXPORT_BYTES {
@@ -137,6 +157,13 @@ pub fn export_html_file(html: String, suggested_name: String) -> CommandResult<O
     Ok(Some(path_string(&target)))
 }
 
+#[cfg(any(target_os = "android", target_os = "ios"))]
+#[tauri::command]
+pub fn export_html_file(_html: String, _suggested_name: String) -> CommandResult<Option<String>> {
+    Err(MOBILE_PLUGIN_MESSAGE.to_owned())
+}
+
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 #[tauri::command]
 pub fn save_backup_file(contents: String, suggested_name: String) -> CommandResult<Option<String>> {
     if contents.len() as u64 > MAX_BACKUP_BYTES {
@@ -159,6 +186,13 @@ pub fn save_backup_file(contents: String, suggested_name: String) -> CommandResu
     Ok(Some(path_string(&target)))
 }
 
+#[cfg(any(target_os = "android", target_os = "ios"))]
+#[tauri::command]
+pub fn save_backup_file(_contents: String, _suggested_name: String) -> CommandResult<Option<String>> {
+    Err(MOBILE_PLUGIN_MESSAGE.to_owned())
+}
+
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 #[tauri::command]
 pub fn open_backup_file() -> CommandResult<Option<String>> {
     let Some(path) = rfd::FileDialog::new()
@@ -177,20 +211,37 @@ pub fn open_backup_file() -> CommandResult<Option<String>> {
         .map_err(|_| AppError::InvalidUtf8.to_string())
 }
 
+#[cfg(any(target_os = "android", target_os = "ios"))]
+#[tauri::command]
+pub fn open_backup_file() -> CommandResult<Option<String>> {
+    Err(MOBILE_PLUGIN_MESSAGE.to_owned())
+}
+
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 #[tauri::command]
 pub fn open_external_url(url: String) -> CommandResult<()> {
-    let parsed = Url::parse(&url).map_err(|_| AppError::InvalidUrl.to_string())?;
-    match parsed.scheme() {
-        "http" | "https" | "mailto" => {}
-        _ => return Err(AppError::InvalidUrl.to_string()),
-    }
-
+    let parsed = validate_external_url(&url)?;
     open::that(parsed.as_str()).map_err(|_| AppError::Io.to_string())
+}
+
+#[cfg(any(target_os = "android", target_os = "ios"))]
+#[tauri::command]
+pub fn open_external_url(url: String) -> CommandResult<()> {
+    validate_external_url(&url)?;
+    Err(MOBILE_PLUGIN_MESSAGE.to_owned())
 }
 
 #[tauri::command]
 pub fn app_version() -> String {
     env!("CARGO_PKG_VERSION").to_owned()
+}
+
+fn validate_external_url(url: &str) -> CommandResult<Url> {
+    let parsed = Url::parse(url).map_err(|_| AppError::InvalidUrl.to_string())?;
+    match parsed.scheme() {
+        "http" | "https" | "mailto" => Ok(parsed),
+        _ => Err(AppError::InvalidUrl.to_string()),
+    }
 }
 
 fn read_markdown(path: &Path) -> Result<OpenedFile, AppError> {
@@ -318,6 +369,13 @@ mod tests {
     fn adds_markdown_extension_when_missing() {
         assert_eq!(ensure_markdown_name("notes"), "notes.md");
         assert_eq!(ensure_markdown_name("notes.md"), "notes.md");
+    }
+
+    #[test]
+    fn validates_external_urls_by_scheme() {
+        assert!(validate_external_url("https://example.com").is_ok());
+        assert!(validate_external_url("mailto:hello@example.com").is_ok());
+        assert!(validate_external_url("file:///etc/passwd").is_err());
     }
 
     #[test]
