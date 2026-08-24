@@ -12,6 +12,7 @@ const MAX_MARKDOWN_BYTES: u64 = 16 * 1024 * 1024;
 const MAX_EXPORT_BYTES: usize = 32 * 1024 * 1024;
 const MAX_BACKUP_BYTES: u64 = 4 * 1024 * 1024;
 const MARKDOWN_EXTENSIONS: &[&str] = &["md", "markdown", "mdown", "mkdn", "txt"];
+#[cfg(any(target_os = "android", target_os = "ios"))]
 const MOBILE_PLUGIN_MESSAGE: &str = "This operation is handled by Markora's mobile file picker.";
 
 #[derive(Debug)]
