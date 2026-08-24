@@ -1,8 +1,10 @@
+import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { useEffect, useState } from 'react';
 
 import { useI18n } from '../i18n';
-import { isDesktopRuntime } from '../lib/platform';
+import { isDesktopRuntime, isTauriRuntime } from '../lib/platform';
 
 interface FileDropOptions {
   onDesktopPaths: (paths: string[]) => void | Promise<void>;
@@ -13,6 +15,44 @@ interface FileDropOptions {
 export function useFileDrop({ onDesktopPaths, onBrowserFiles, onError }: FileDropOptions) {
   const { t } = useI18n();
   const [dragActive, setDragActive] = useState(false);
+
+  useEffect(() => {
+    if (!isTauriRuntime()) return;
+
+    let disposed = false;
+    let unlisten: (() => void) | undefined;
+    const handled = new Set<string>();
+
+    const openUniquePaths = (paths: string[]) => {
+      if (disposed || paths.length === 0) return;
+      const unique = paths.filter((path) => {
+        if (!path || handled.has(path)) return false;
+        handled.add(path);
+        return true;
+      });
+      if (unique.length === 0) return;
+
+      void Promise.resolve(onDesktopPaths(unique)).catch(() => {
+        onError(t('dropOpenFailed'));
+      });
+    };
+
+    void listen<string[]>('opened-files', (event) => openUniquePaths(event.payload))
+      .then((cleanup) => {
+        if (disposed) cleanup();
+        else unlisten = cleanup;
+      })
+      .catch(() => onError(t('dropInitFailed')));
+
+    void invoke<string[]>('take_opened_urls')
+      .then(openUniquePaths)
+      .catch(() => onError(t('dropOpenFailed')));
+
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
+  }, [onDesktopPaths, onError, t]);
 
   useEffect(() => {
     if (isDesktopRuntime()) {
