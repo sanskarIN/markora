@@ -10,6 +10,12 @@ The current development/release-candidate line is **v0.5.x**. It contains the co
 
 Android remains a separately verified project target; see `docs/android.md`.
 
+### Historical release tags
+
+`v0.1.x` releases are historical preview milestones. The current `main` branch is **0.5.0**, so new `v0.1.x` tags must not be created from `main` and must not be presented as builds whose package metadata is `0.1.x`.
+
+If a historical `v0.1.x` release needs correction, work from the exact historical commit/tag that produced that release. For new development work, continue from the current `v0.5.x` line rather than creating a version-skipping tag that contradicts package metadata.
+
 ## Before tagging
 
 Confirm the working branch is clean and review `CHANGELOG.md`, `ROADMAP.md`, and `what_changed.md`.
