@@ -13,6 +13,19 @@ All notable Markora changes are documented here. Markora uses semantic-version-s
 - Release-build screenshots must replace illustrative artwork where required for stable launch.
 - Actual signing/notarization status must be recorded per artifact; strategy documentation alone is not treated as completed signing.
 
+## [0.1.4] - Maintenance release
+
+### Changed
+
+- Synchronized the frontend, Tauri, and Rust package metadata at **0.1.4**.
+- Prepared the release branch so the `v0.1.4` tag can pass the repository's release-tag/version synchronization gate.
+- Retained the CI hardening from the preceding maintenance work, including the ESLint peer-range alignment and Rust formatting correction.
+
+### Verification
+
+- Release publication is gated by the repository's version synchronization, capability audit, formatting, lint, typecheck, test, build, bundle-size, and release-tag checks.
+- Cross-platform packaging remains subject to the hosted release workflow completing successfully.
+
 ## [0.5.0] - Unreleased
 
 ### Added

@@ -1,6 +1,6 @@
 [package]
 name = "markora"
-version = "0.5.0"
+version = "0.1.4"
 description = "Markora local-first Markdown editor"
 authors = ["Sanskar <sanskarin@outlook.in>"]
 edition = "2024"
