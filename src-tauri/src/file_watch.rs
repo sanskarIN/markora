@@ -10,7 +10,8 @@ pub fn file_fingerprint(path: String) -> Result<String, String> {
 
 fn fingerprint(path: &Path) -> Result<String, String> {
     validate_markdown_extension(path)?;
-    let metadata = fs::symlink_metadata(path).map_err(|_| "The file is no longer available.".to_owned())?;
+    let metadata =
+        fs::symlink_metadata(path).map_err(|_| "The file is no longer available.".to_owned())?;
 
     if metadata.file_type().is_symlink() {
         return Err("Symbolic-link paths are not monitored directly for safety.".to_owned());
@@ -39,7 +40,10 @@ fn validate_markdown_extension(path: &Path) -> Result<(), String> {
         .map(str::to_ascii_lowercase)
         .ok_or_else(|| "That file type is not supported.".to_owned())?;
 
-    if MARKDOWN_EXTENSIONS.iter().any(|candidate| *candidate == extension) {
+    if MARKDOWN_EXTENSIONS
+        .iter()
+        .any(|candidate| *candidate == extension)
+    {
         Ok(())
     } else {
         Err("That file type is not supported.".to_owned())
